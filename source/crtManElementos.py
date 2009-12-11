@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 
 from PyQt4 import QtGui, QtCore
 
@@ -20,16 +20,16 @@ class crtManElementos(QtGui.QWidget):
          Form = QtGui.QWidget()
          ui = frmElementos.Ui_Form()
          ui.setupUi(Form)
-         Form.setWindowModality(QtCore.Qt.WindowModal)		 
-         Form.show()	
+         Form.setWindowModality(QtCore.Qt.WindowModal)
+         Form.show()
     	 self._carregaLista()
     	 Form.exec_()
-		 
+
     def _carregaLista(self):
 	    print "carrega lista"
-        
+
     def mostra(self):
         a=1
 
 if __name__ == "__main__":
-    mostra()   
+    mostra()

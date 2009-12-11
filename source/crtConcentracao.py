@@ -2,7 +2,7 @@
 # Exibe os resultados do calculo 
 # utiliza as classes: 
 # 1. frmconcentra: formulario criado pelo QtDesigner 
-# 2. VispectFuncs: FunÁıes para manipular o formulario acima para inclus„o dos dados na tabela.
+# 2. VispectFuncs: Fun√ß√µes para manipular o formulario acima para inclus√£o dos dados na tabela.
 # 3. frmResConcentra: 
 
 from PyQt4 import QtGui, QtCore
@@ -105,7 +105,7 @@ class startGui(QtGui.QMainWindow):
 #       print 'iiiiiiiiiiiiiiiiiiiiiii'
         msg = QtGui.QMessageBox(self)
         msg.setIcon(QtGui.QMessageBox.Critical)
-        msg.setText("Erro: Impress„o IndisponÌvel!")
+        msg.setText("Erro: Impress√£o Indispon√≠vel!")
         msg.exec_()
         return
 
@@ -157,7 +157,7 @@ class startGui(QtGui.QMainWindow):
            f.close()
 
     def fconcentra(self):
-#exibe tela para entrada de dados para calculo da concentraÁ„o, antes verificar se est· marcado....algum item para o calculo 
+#exibe tela para entrada de dados para calculo da concentra√ß√£o, antes verificar se est√° marcado....algum item para o calculo 
         dconcentra = QtGui.QDialog()
         ui = frmconcentra.Ui_dconcentra()
         ui.setupUi(dconcentra)
@@ -213,7 +213,7 @@ class startGui(QtGui.QMainWindow):
 #            print self.ro
 #            print self.kres
         else:
-            raise "IOError",("Arquivo n„o existe %s " % vfile)
+            raise "IOError",("Arquivo n√£o existe %s " % vfile)
             return 1 
 
     def gravaConcentracao(self):

@@ -1,4 +1,4 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 
 import Numeric
 import crtConcentracao
@@ -46,14 +46,14 @@ class VispectFit:
 
 #silvio rotinas de ajustes vispect
 
-            
+
     def vispectfit(self,xmin,xmax,vlegend):
-# ler calibra��o arquivo .cal  
-#        if self.lerCalibracao(): 
-#            print "erro: Leitura de Calibra��o"
+# ler calibracao arquivo .cal
+#        if self.lerCalibracao():
+#            print "erro: Leitura de Calibracao"
 #            msg = qt.QMessageBox(self)
 #            msg.setIcon(qt.QMessageBox.Critical)
-#            msg.setText("Ler calibra��o antes de processar!")
+#            msg.setText("Ler calibracao antes de processar!")
 #            msg.exec_loop()
 #            return
 #        self.ro=0.85465008020401
@@ -76,18 +76,18 @@ class VispectFit:
 #        self.offset=0.3638114035129547
 #        self.offset=5.074393272399902
 #        self.offset=0.3638114035129547
-# lt � o tempo vivo 
+# lt: o tempo vivo
         #        self.Lt = 180000.0/50
-#quando da leitura do arquivo l� o tempo Vivo e Morto
+#quando da leitura do arquivo le o tempo Vivo e Morto
 #       self.Lt = 7200
 #        self.Lt = 3597.633136
-#        if calon <> 2: 
-# ler nivel de procura = 15 
+#        if calon <> 2:
+# ler nivel de procura = 15
 #        print 'aaaalegend'
 #        print vlegend
         self.Vispectdic={}
         self.vinfo = vlegend
-# recupera dados de calibra��o
+# recupera dados de calibracao
         self.slope=self.vinfo['slope']
         self.offset=self.vinfo['offset']
         self.ro=self.vinfo['ro']
@@ -106,9 +106,9 @@ class VispectFit:
         self.ideb=40
         oldfi=0
         #print xmax
-        #???? verificar o fim para loop 
+        #???? verificar o fim para loop
         #print vfim
-        
+
         for j in range(self.ideb,vfim):
             #print j
             self.vy[j] = self.fcanal(j,4,0)
@@ -150,11 +150,11 @@ class VispectFit:
  #       file.write("contenuailes %f\n" %(contenuailes))
  #       file.write("contenucentre %f\n" %(contenucentre))
  #       file.close
- #       file=0       
+ #       file=0
         #print contenuailes
         #print contenucentre
-#Correlator da inicia��o para optimize a velocidade
-#'do c�lculo do spectrum (correlates reduzidos do Nb. raizes dos cross-sections)        
+#Correlator da iniciacao para optimize a velocidade
+#'do calculo do spectrum (correlates reduzidos do Nb. raizes dos cross-sections)
 #        for j in range(i,int(self.ifin - nccorrel*3)+1):
  #       file=open("c:correl.txt",'w')
  #       file.write("contenuailes;contenucentre;canalcorrel\n")
@@ -169,30 +169,30 @@ class VispectFit:
 #            print contenucentre
 #            print canalcorrel
 #            print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-#            if j > 60: 
-#               return 
+#            if j > 60:
+#               return
             contenuailes = contenuailes - Numeric.sqrt((self.fcanal(j-nccorrel*2,2,0))) + Numeric.sqrt((self.fcanal(j+nccorrel*3,2,0)))
             contenucentre = contenucentre - Numeric.sqrt((self.fcanal(j,2,0))) + Numeric.sqrt((self.fcanal(j+nccorrel,2,0)))
             canalcorrel = contenucentre*5-contenuailes
  #           file.write("%f;%f;%f;%f;%f;%f\n" %(kcan,j,self.fcanal(j,2,0),contenuailes,contenucentre,canalcorrel))
             if canalcorrel > barre and self.f1zdeb == 0:
-                self.fnzondeb(kcan,nccorrel)    
+                self.fnzondeb(kcan,nccorrel)
             if self.f1zdeb == 1:
                 somcorrel = somcorrel + canalcorrel
-#silvio ver comparacao de interiro e float             
+#silvio ver comparacao de interiro e float
             if (self.f1zdeb == 1) and (canalcorrel > oldcanalcorrel) :
                 self.vy[kcan-1] = self.fcanal(kcan-1,4,1)
                 self.vy[kcan] = self.fcanal(kcan,3,1)
             if canalcorrel < barre and self.f1zfin == 0 and self.f1zdeb == 1:
-                self.fnzonfin(kcan,nccorrel)    
+                self.fnzonfin(kcan,nccorrel)
             if self.f1zdeb == 1 and self.f1zfin == 1 :
 #                for il in range(self.Id,self.Fi):
-#                print "inicio = %d Fim = %d " %(self.Id,self.Fi) 
+#                print "inicio = %d Fim = %d " %(self.Id,self.Fi)
                 for il in range(self.Id,self.Fi+1):
     #                    if (int(self.fcanal(il,1,1)) & &B10) = &B10 :
                     if (int(self.fcanal(il,1,1)) & 2) == 2 :
                         ksommet = il+1
-                        break 
+                        break
                 ener = ksommet*self.slope + self.offset
                 lmh = float(self.ro*(1 + self.kres*Numeric.sqrt(ener)))/self.slope
                 if self.Id < oldfi:
@@ -217,7 +217,7 @@ class VispectFit:
 #                    for i1 in range(self.Id,self.Fi):
                     for il in range(self.Id,self.Fi+1):
                         self.vy[il] = self.fcanal(il,3,0)
-                        somcan = somcan + Numeric.sqrt(self.fcanal(il,2,0))    
+                        somcan = somcan + Numeric.sqrt(self.fcanal(il,2,0))
                         som = som + self.fcanal(il,2,0)
                     oldfi = self.Fi
 #                    print "soma"
@@ -246,26 +246,26 @@ class VispectFit:
             oldcanalcorrel = canalcorrel
         self.f1zdeb = 0
         self.f1zfin = 0
-#Formar ondas- o controle para determinar as m�scaras pequenas dos picos pelos picos grandes        
+#Formar ondas- o controle para determinar as mascaras pequenas dos picos pelos picos grandes
 #silvio mostra valores de canais para entendimento
  #       file.close
- #       file=0       
+ #       file=0
  #       file=open("c:fit1.txt",'w')
  #       for j in range(0,8190):
  #          file.write("%d;%d\n" %(j,self.vy[j]))
  #       file.close
- #       file=0       
+ #       file=0
 #        for j in range(int(self.ideb + nccorrel*2),int(self.ifin - nccorrel*2)):
-#monta loop iniciando de ideb=40 + nccorrel=5*2 = 10 
+#monta loop iniciando de ideb=40 + nccorrel=5*2 = 10
         syg=0
         for j in range(int(self.ideb + nccorrel*2),int(self.ifin - nccorrel*2)+1):
     #    if (int(self.fcanal(j,1,0)) & &B1)  = &B1 & f1zdeb = 0:f1zdeb = 1 : Id = J
-            vtes=int(self.fcanal(j,1,0))    
+            vtes=int(self.fcanal(j,1,0))
             if (((vtes & 1)  == 1) and self.f1zdeb == 0):
                 self.f1zdeb = 1
                 self.Id = j
     #    if (int(self.fcanal(j,1,0)) & &B1) = 0 & f1zdeb = 1:f1zfin = 1 : Fi = J-1
-    
+
             if (((vtes & 1) == 0) and self.f1zdeb == 1):
                 self.f1zfin = 1
                 self.Fi = j-1
@@ -297,7 +297,7 @@ class VispectFit:
                     if self.fcanal(il,2,0) > self.fcanal(kmax,2,0):
                         kmax = il
                 somnette = som - (self.fcanal(self.Id,2,0) + self.fcanal(il-1,2,0))*float(ncanaux)/2
-                #silvio coloquei pois estava dando erro quando ideb=0 
+                #silvio coloquei pois estava dando erro quando ideb=0
                 #syg=0.01
 #                if self.Id == 129:
 #                   print "som = %d somnette = %d ncanaux = %d" %(som,somnette,ncanaux)
@@ -325,7 +325,7 @@ class VispectFit:
                     som = som + self.fcanal(i1,2,0)
                     if self.fcanal(i1,2,0) > self.fcanal(kmax,2,0):
                         kmax = i1
-# estava il ele e n�o i1 um                         
+# estava il ele e nao i1 um
                 somnette = som - (self.fcanal(self.Fi,2,0) + self.fcanal(i1,2,0))*float(ncanaux)/2
                 if somnette <> 0.0:
                     syg = float(200*Numeric.sqrt(somnette + 2*(som-somnette)))/somnette
@@ -344,25 +344,25 @@ class VispectFit:
   #      for j in range(0,8190):
   #         file.write("%d;%d\n" %(j,self.vy[j]))
   #      file.close
-  #      file=0       
+  #      file=0
         self.ideb=sauveideb
         self.ImpZonesPic()
         return self.Vispectdic
 
     #    RETURN
-#  remonta grafico 
-            
-            
-# localiza inicio da zona 
+#  remonta grafico
+
+
+# localiza inicio da zona
     def fnzondeb(self,kcan,nccorrel):
 #        for i1 in range(kcan,kcan-nccorrel*2,-1):
         for i1 in range(kcan,(kcan-nccorrel*2)-1,-1):
             self.Id = i1 - 1
-            if i1 < 3 : 
+            if i1 < 3 :
                 return 0
             co = self.fcanal((i1-1),2,0) + self.fcanal((i1-2),2,0)
-            if ((self.fcanal(i1,2,0)+co) <= (self.fcanal(i1-3,2,0)+co)) : 
-                break 
+            if ((self.fcanal(i1,2,0)+co) <= (self.fcanal(i1-3,2,0)+co)) :
+                break
         self.moyamont = float(self.fcanal(i1,2,0)+co)/3
         self.f1zdeb = 1
         return 1
@@ -373,28 +373,28 @@ class VispectFit:
         for il in range(kcan,(kcan+nccorrel*2)+1):
             self.Fi = il + 1
             co = self.fcanal(il+1,2,0) + self.fcanal(il+2,2,0)
-            if ((self.fcanal(il,2,0)+co) <= (self.fcanal(il+3,2,0)+co)) : 
+            if ((self.fcanal(il,2,0)+co) <= (self.fcanal(il+3,2,0)+co)) :
                 break
         self.moyaval = (float(self.fcanal(il,2,0)+co)/3)
         self.f1zfin = 1
         return 1
-    
-# a fun��o tem 4 a��es depende do nfoco:
+
+# a funcao tem 4 acoes dependendo do nfoco:
 # 1 - para obter o byte de peso forte de um canal
 # 2 - para mascarar o byte de peso forte de um canal e para obter assim
-#     seus �ndices
+#     seus indices
 # 3 - para ativar um pouco de estado do byte do peso forte de acordo com
-#     a vari�vel de acao (0� 7)
+#     a variavel de acao (0 7)
 # 4 - Desativar um pouco de estado do byte do peso forte de acordo com a
-#     vari�vel de acao (0� 7)
-#                   
+#     variavel de acao (0 7)
+#
     def fcanal(self,i,nfoco,acao):
         #print i
         decal=16777216
 #   deu erro quando vy contem numeros negativos
 #        octetfort = int(float(self.vy[i])/decal)
         octetfort = int(int(self.vy[i])/decal)
-#        if self.vy[i] < 0 : 
+#        if self.vy[i] < 0 :
 #           print "octetfort = int(float(self.vy[i])/decal)"
 #           print type(self.vy[i])
 #           print self.vy[i]
@@ -404,7 +404,7 @@ class VispectFit:
 #           print type(octetfort)
 #           print acao
 #           print self.vy[i] - long(octetfort)*decal
-#           return 
+#           return
         if nfoco == 1:
            return long(octetfort)
         if nfoco == 2:
@@ -427,14 +427,14 @@ class VispectFit:
         vAp = vAq - ( self.fcanal(I,2,0) - (self.A1*I+self.B1))
         return ((I-1) + float(self.Aire*Fm - vAp)/(vAq - vAp) + 0.5)
 
-# verifica regi�es e calcula area 
+# verifica regioes e calcula area
 #   def GravaTeste(self,y):
 #LOCATE 12,17 : INPUT "Desvio padrao, % de incerteza (1,2 ou 3) = ",Sig%
 #    file=open("c:teste",'w')
 #    for j in range(0,8000):
 #       file.write("%d;%d;%d\n" %(j,y[j],self.vy[j]))
 #  file.close
-#    file=0       
+#    file=0
 
     def ImpZonesPic(self):
 #LOCATE 12,17 : INPUT "Desvio padrao, % de incerteza (1,2 ou 3) = ",Sig%
@@ -446,35 +446,35 @@ class VispectFit:
         Cmax = 0
         NbSommets = 0
         self.NoPic = 0
-        self.Id=0 
+        self.Id=0
         self.ideb=0
         #print 'loop ideb=%d Ifin=%d ' %(self.ideb,self.ifin)
 #        for Il in range(self.ideb,self.ifin):
         for Il in range(self.ideb,self.ifin+1):
             #print Il
             vres=int(self.fcanal(Il,1,0))
-            #print 'i=%d Flag %d' %(Il,Flag)  
-            if (vres & 1) == 0: 
-                if Flag <> 0 : 
+            #print 'i=%d Flag %d' %(Il,Flag)
+            if (vres & 1) == 0:
+                if Flag <> 0 :
                     self.Fi = Il-1
                     self.Y1 = float(self.fcanal((self.Id-1),2,0) + self.fcanal(self.Id,2,0) + self.fcanal((self.Id+1),2,0))/3
                     self.Y2 = float(self.fcanal((self.Fi-1),2,0) + self.fcanal(self.Fi,2,0) + self.fcanal((self.Fi+1),2,0))/3
 #                    if self.Id == 479:
 #                       print "aaaaaaaaaaaaaa self.Fi                    "
-#                       print self.Fi                    
-#                       print self.Y1                    
-#                       print self.Y2                    
+#                       print self.Fi
+#                       print self.Y1
+#                       print self.Y2
 #                        self.A1 = 0.0
 #                    else:
                     self.A1 = float(self.Y1-self.Y2)/(self.Id-self.Fi)
                     self.B1 = self.Y1 - self.A1*self.Id
  #                   if self.Id == 479:
  #                      print "bbbbbbbbbbbbb     self.Fi                    "
- #                      print self.Fi                    
- #                      print self.Y1                    
- #                      print self.Y2                    
- #                      print self.A1                    
- #                      print self.B1                    
+ #                      print self.Fi
+ #                      print self.Y1
+ #                      print self.Y2
+ #                      print self.A1
+ #                      print self.B1
                     oldfi = self.Fi
  #                   print 'Antes Id=%d Fi=%d OldFi=%d \n' %(self.Id,self.Fi,oldfi)
                     if NbSommets <= 1 :
@@ -492,16 +492,16 @@ class VispectFit:
                                     Ivallee = J
                             Ecart = ContVallee-(Ivallee*self.A1+self.B1)
                             if (Ecart < Numeric.sqrt(self.fcanal(self.Isommet[K],2,0))) and (Ecart < Numeric.sqrt(self.fcanal(self.Isommet[K+1],2,0))):
-                                self.Y1 = float(self.Id*self.A1+self.B1) 
+                                self.Y1 = float(self.Id*self.A1+self.B1)
                                 self.Y2 = float(ContVallee)
                                 if ContVallee-(Ivallee*self.A1+self.B1) < 0 :
  #                                   print "Y1=%f Y2=%f Fi=%f Ivallee=%f ContVallee=%f " %(self.Y1,self.Y2,self.Fi,Ivallee,ContVallee)
                                     #print oldfi
-                                    #silvio coloquei pois Ivallee - oldfi = 0 
+                                    #silvio coloquei pois Ivallee - oldfi = 0
  #                                   print 'Oldfi=%f self.A1=%f self.B1=%f' %(oldfi,self.A1,self.B1)
-                                    if Ivallee <> oldfi: 
+                                    if Ivallee <> oldfi:
                                         self.A1 = float(ContVallee-(oldfi*self.A1+self.B1))/(Ivallee-oldfi)
-                                    else:     
+                                    else:
                                         self.A1 = float(ContVallee-(oldfi*self.A1+self.B1))/1
                                     #    self.A1 = 1
                                     self.B1 = ContVallee-self.A1*Ivallee
@@ -512,13 +512,13 @@ class VispectFit:
                                     self.Multiplet(self.Id,self.Fi)
                                 else:
  #                                   print 'ttttttttttttter  Id=%d Fi=%d OldFi=%d \n' %(self.Id,self.Fi,oldfi)
-                                    
+
                                     self.TraiPicSimple()
                                 Npic = 1
                                 self.Id = self.Fi
                             else:
                                 Npic=Npic+1
-                        self.Fi = oldfi 
+                        self.Fi = oldfi
                         #print '222 - Depois Id=%d Fi=%d OldFi=%d \n' %(self.Id,self.Fi,oldfi)
                         self.Y1 = float(self.Id*self.A1)+float(self.B1)
                         self.Y2 = float(self.Fi*self.A1)+float(self.B1)
@@ -526,21 +526,21 @@ class VispectFit:
     #                        print 'qua'
     #                        if self.Id == 479:
     #                          print "qqqqqqqqqqqq     self.Fi                    "
-    #                          print self.Fi                    
-    #                          print self.Y1                    
-    #                          print self.Y2                    
-    #                          print self.A1                    
-    #                          print self.B1                    
+    #                          print self.Fi
+    #                          print self.Y1
+    #                          print self.Y2
+    #                          print self.A1
+    #                          print self.B1
                             self.Multiplet(self.Id,self.Fi)
-                        else:    
+                        else:
  #                           print 'qui  Id=%d Fi=%d OldFi=%d \n' %(self.Id,self.Fi,oldfi)
  #                           print 'y1 = %d y2=%d\n' %(self.Y1,self.Y2)
  #                           print 'a1 = %d b1=%d\n' %(self.A1,self.B1)
                             self.TraiPicSimple()
  #                   print 'Depois Id=%d Fi=%d OldFi=%d \n' %(self.Id,self.Fi,oldfi)
                     Flag = 0
-                    Sum = 0 
-                    Cmax = 0 
+                    Sum = 0
+                    Cmax = 0
                     NbSommets = 0
             if (vres & 1) == 1:
                 if Flag == 0:
@@ -557,8 +557,8 @@ class VispectFit:
                     Cmax = self.fcanal(Il,2,0)
 #CALL ChgtEcran(self.ideb,self.ifin)
 
-        #print 'imppppppppppppppppppppppppp'   
-#        print self.Vispectdic    
+        #print 'imppppppppppppppppppppppppp'
+#        print self.Vispectdic
         self.VisTable.ui.lblespectro.setText(self.vinfo['SourceName'])
         self.VisTable.ui.lblvivo.setText(str(self.vinfo['TempoVivo']))
         self.VisTable.ui.lblmorto.setText(str(self.vinfo['TempoTotal']))
@@ -566,7 +566,7 @@ class VispectFit:
 #           self.VisTable.ui.txtdata.setDate(self.info['DataTempo'])
 #        else:
 #           self.VisTable.ui.txtdata.setDate('10/10/2007')
-#        self.VisTable.adicionar(self.Vispectdic) 
+#        self.VisTable.adicionar(self.Vispectdic)
 #'        Procedure pour determiner l'abscisse exacte
 #'            et la self.Resolution d'un pic
 #' Determination de la pente du bruit de fond
@@ -616,7 +616,7 @@ class VispectFit:
         self.Vispectdic[self.NoPic]=vdic
         self.NoPic = self.NoPic + 1
 #        self.VisTable.adicionar(self.NoPic,pIt,(pAbsi*self.slope+self.offset),pAire,pBgnd,pResol,pAbsi,pId,(pFi-pId+1),(float(pAire)/pLt),pErreur)
-        
+
 
 #SHARED  Sum,self.Aire,self.Bgnd,Y1,Y2,B&()
 #LOCAL Fin,Deb,I,S
@@ -640,19 +640,19 @@ class VispectFit:
         if Mode == 1:
             self.Bgnd = float(float(self.Y1+self.Y2)*S)/2
         self.Aire = Sum - self.Bgnd
-        #silvio caso self.Aire = 0 
+        #silvio caso self.Aire = 0
         #if self.Aire == 0:
         #    self.Aire = 1
 
     def TraiPicSimple(self):
-#    Tratamento de picos simples 
+#    Tratamento de picos simples
         self.IntZone(self.Id,self.Fi,1)
-        #silvio coloquei if caso zero isso quando inicio ideb de 0 e n�o 40 
-        if self.Aire == 0: 
+        #silvio coloquei if caso zero isso quando inicio ideb de 0 e nao 40
+        if self.Aire == 0:
             self.Erreur=0.0
             self.Resol=0.0
             self.Absi=0
-        else:   
+        else:
             #print self.Bgnd
             #print self.Aire
             #print self.sig
@@ -692,22 +692,22 @@ class VispectFit:
     #    for j in range(0,100):
     #        file.write("%d;%d\n" %(j,Absi[j]))
     #    file.close
-    #    file=0       
+    #    file=0
     #    file=open("c:Dlmh.txt",'w')
     #    for j in range(0,100):
     #        file.write("%d;%f\n" %(j,Dlmh[j]))
     #    file.close
-    #    file=0       
+    #    file=0
     #    file=open("c:Alp.txt",'w')
     #    for j in range(0,100):
     #        file.write("%d;%f\n" %(j,Alp[j]))
     #    file.close
-    #    file=0       
+    #    file=0
     #    file=open("c:Azo.txt",'w')
     #    for j in range(0,100):
     #        file.write("%d;%f\n" %(j,Azo[j]))
     #    file.close
-    #    file=0       
+    #    file=0
         Nx = Jv*Np
         A=Numeric.zeros([Nc+1,Nx+1], Numeric.Float64)
         C=Numeric.zeros([Nc+1], Numeric.Float64)
@@ -722,7 +722,7 @@ class VispectFit:
         Sigm=Numeric.zeros([100], Numeric.Float64)
         Ainv=Numeric.zeros([Nx+1,Nx+1], Numeric.Float64)
         It = 0
-        Sortie = 0 
+        Sortie = 0
         Jtest = 0
 #' Debut de la boucle de convergence
     #    print "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -739,7 +739,7 @@ class VispectFit:
 #                print 'L'
 #                print L
                 C[L] = float(self.fcanal(I,2,0)) - (float(I)*self.A1+self.B1)
-                if C[L] <= 0.0 : 
+                if C[L] <= 0.0 :
                     C[L] = 1.0
                 W[L] = float(1.0)/C[L]
                 Yzot = 0.0
@@ -747,16 +747,16 @@ class VispectFit:
                 for J in range(1,Np+1):
                     CalInt = float(-Alp[J]*(float(I)-Absi[J])**2)
                     if CalInt < -81 :
-                        Yzo = 0.0 
+                        Yzo = 0.0
                     else:
                         Yzo = float(Azo[J]*Numeric.exp(CalInt))
                     Yzot = Yzot + Yzo
                     B[L] = C[L] - Yzot
                     K = 1 + Jv*(J-1)
-                    #silvio coloquei pois qdo divide por zero da erro 
+                    #silvio coloquei pois qdo divide por zero da erro
                     if Azo[J] == 0:
                         A[L,K] = 0
-                    else:    
+                    else:
                         A[L,K] = float(Yzo)/Azo[J]
                     A[L,K+1] = float(2*Yzo*Alp[J]*(I-Absi[J]))
                     if Jv == 3 :
@@ -765,24 +765,24 @@ class VispectFit:
     #        for j in range(0,Nc+1):
     #           file.write("%-f;%-f\n" %(j,C[j]))
     #        file.close
-    #        file=0       
+    #        file=0
     #        file=open("c:W.txt",'w')
     #        for j in range(0,Nc+1):
     #           file.write("%f;%f\n" %(j,W[j]))
     #        file.close
-    #        file=0       
+    #        file=0
     #        file=open("c:B.txt",'w')
     #        for j in range(0,Nc+1):
     #           file.write("%f;%f\n" %(j,B[j]))
     #        file.close
-    #        file=0       
+    #        file=0
 #    'formation de la matrice Ainv#
 #silvio mostra valores de canais para entendimento
 #            file=open("c:Avet.txt",'w')
 #            for e in range(1,NC):
 #                file.write(str(e)+' - '+str(A[e].tolist()))
 #            file.close
-#            file=0       
+#            file=0
 #           for J in range(1,Nx):
 #               for K in range(1,Nx):
             for J in range(1,Nx+1):
@@ -801,15 +801,15 @@ class VispectFit:
     #          for j in range(1,Nx):
     #            file.write("%d,%d;%f\n" %(i,j,Ainv[i,j]))
     #        file.close
-    #        file=0       
-            
+    #        file=0
+
             Ainv=self.InvMd(Nx+1,Ainv)
     #        file=open("c:Ainvd.txt",'w')
     #        for i in range(1,Nx):
     #          for j in range(1,Nx):
     #            file.write("%d,%d;%f\n" %(i,j,Ainv[i,j]))
     #        file.close
-    #        file=0       
+    #        file=0
 #            A=LinearAlgebra.inverse(Ainv)
 #    ' formation de la matrice V
 #            for J in range(1,Nx):
@@ -830,29 +830,29 @@ class VispectFit:
     #                file.write('%f;%f;%f\n' %(T[I],aa,V[J]))
 #    ' Test de convergence
     #        file.close
-    #        file=0       
+    #        file=0
             Jtest = 0
-            #print 'passou '     
+            #print 'passou '
 #            for J in range(1,Np):
     #        file=open("c:Alp2.txt",'w')
     #        for j in range(0,100):
     #            file.write("%d;%f\n" %(j,Alp[j]))
     #        file.close
-    #        file=0       
+    #        file=0
     #        file=open("c:Azo2.txt",'w')
     #        for j in range(0,100):
     #            file.write("%d;%f\n" %(j,Azo[j]))
     #        file.close
-    #        file=0       
+    #        file=0
 
             for J in range(1,Np+1):
                 Dif3 = 0.0
                 K = 1 + Jv*(J-1)
                 Azo[J] = Azo[J] + T[K]
                 if Azo[J] <= 0.0 :
-                    Sortie=Sortie+1 
-                    break 
-                #print 'dife'     
+                    Sortie=Sortie+1
+                    break
+                #print 'dife'
                 Dif1 = abs(float(T[K])/Azo[J])
                 #silvio converti para inteiro
                 #print 'absi T'
@@ -873,16 +873,16 @@ class VispectFit:
                     Alp[J] = Alp[J] + T[K+2]
                     if Alp[J] <= 0.0 :
                         Sortie=Sortie+1
-                        break 
+                        break
                     Dif3 = abs(float(T[K+2])/Alp[J])
-    #            print 'Dif1=%f Dif2=%f Dif3=%f Jtest=%d' %(Dif1,Dif2,Dif3,Jtest)    
+    #            print 'Dif1=%f Dif2=%f Dif3=%f Jtest=%d' %(Dif1,Dif2,Dif3,Jtest)
                 if Dif1 < 0.01 and Dif2 < 0.01 and Dif3 < 0.01 :
                     Jtest=Jtest+1
             It=It+1
             #print 'it'
             #print It
             if It == 10 :
-                #silvio coloquei para for�ar entrar na proxima condi��o 
+                #silvio coloquei para forcar entrar na proxima condicao
                 #Sortie = 0
                 break
     # Si non convergence, on impose la self.Resolution
@@ -917,8 +917,8 @@ class VispectFit:
                 for J in range(1,Np+1):
                     Mu = -Alp[J]*(K-Absi[J])**2
                     if Mu < -81 :
-                        Yg[J,I] = 0 
-                    else: 
+                        Yg[J,I] = 0
+                    else:
                         Yg[J,I] = Azo[J]*Numeric.exp(Mu)
                     Yt[I] = Yt[I] + Yg[J,I]
                 Res[I] = self.fcanal(K,2,0) - (K*self.A1+self.B1) - Yt[I]
@@ -945,11 +945,11 @@ class VispectFit:
                 #problema com raiz de numero negativo.....verificar A T E N C A O
     #            print 'aaaaaaaaaaa multiplet aaaaaaaaaaaaa %d' %(Absi[J])
     #            print 'Vazo=%d Valp=%d Resl=%d Resk=%d Ener=%d Decal=%d' %(Vazo,Valp,Resl,Resk,Ener,Decal)
-                if (2*self.Bgnd) > Sur[J]: 
+                if (2*self.Bgnd) > Sur[J]:
                     self.Erreur = float(self.sig*100*Numeric.sqrt(2*self.Bgnd+Sur[J]))/Sur[J]
-                else:   
-                   self.Erreur = 0 
-                    
+                else:
+                   self.Erreur = 0
+
     #            print 'aaaaaaaaaaa multiplet aaaaaaaaaaaaa %d' %(Absi[J])
     #            print 'it=%d Absi=%d Sur=%d Bg=%d Resk=%d id=%d Fi=%d Erreur=%d Lt=%d' %(It,Absi[J],Sur[J],self.Bgnd,Resk,Id,Fi,self.Erreur,self.Lt)
                 self.ImpRes(It,Absi[J],Sur[J],self.Bgnd,Resk,Id,Fi,self.Erreur,self.Lt)
@@ -965,7 +965,7 @@ class VispectFit:
 
 #'        Procedure d'invertion de matrice
     def InvMd(self,N,A):
-        #cria matriz con n elemento, mais um espa�o de n lelementos para preencher 
+        #cria matriz con n elemento, mais um espaco de n elementos para preencher
         AB=Numeric.zeros([N,(N)*2], Numeric.Float64)
         BB=Numeric.zeros([N,(N)*2], Numeric.Float64)
 #        for I in range(1,N):
@@ -975,16 +975,16 @@ class VispectFit:
             for J in range(1,N):
                 AB[I,J] = A[I,J]
 #silvio
-        Id = N + 1 
+        Id = N + 1
         Fi = N * 2
 #        for I in range(1,N):
 #            for J in range(Id,Fi):
-#preenche com zeros o segundo espa�o da matriz AB
+#preenche com zeros o segundo espaco da matriz AB
         for I in range(1,N):
             for J in range(Id,Fi):
                 AB[I,J] = 0.0
 #        for I in range(1,N):
-# coloca o numero 1 na diagonal da segunda parte da matriz 
+# coloca o numero 1 na diagonal da segunda parte da matriz
         for I in range(1,N):
             J = I + N
             AB[I,J] = 1
@@ -994,7 +994,7 @@ class VispectFit:
 # colocando o resultado na matriz BB, depois continua ......
         for K in range(1,N):
             for J in range(1,Fi):
-#silvio coloquei div 0 , pois deu erro 
+#silvio coloquei div 0 , pois deu erro
                 if AB[K,K] <> 0.0:
                     BB[K,J] = float(AB[K,J])/AB[K,K]
 #            for I in range(1,N):
@@ -1012,7 +1012,7 @@ class VispectFit:
         for I in range(1,N):
             for J in range(1,N):
                 K = J + N
-#                print 'k=%d J=%d I=%d N=%d \n' %(K,J,I,N) 
+#                print 'k=%d J=%d I=%d N=%d \n' %(K,J,I,N)
 #                print AB[I,K]
 #                print A[I,J]
                 A[I,J] = AB[I,K]

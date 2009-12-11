@@ -1,6 +1,6 @@
-# -*- coding: ISO-8859-1 -*-
+# -*- coding: utf-8 -*-
 #
-# Ler arquivo do tipo MCA e CHN - IPEN para convers„o no sistema PYMCA
+# Ler arquivo do tipo MCA e CHN - IPEN para convers√£o no sistema PYMCA
 #
 #
 
@@ -13,11 +13,11 @@ class LerVispect:
     def __init__(self, arquivo):
         self.arquivo = arquivo
         self.tt=0
-        self.tv=0 
+        self.tv=0
         self.dt=""
         self.hora=""
         self.meses={"JAN":"01","FEV":"02","FEB":"02","MAR":"03","ABR":"04","APR":"04","MAI":"05","MAY":"05","JUN":"06","JUL":"07","AGO":"08","AUG":"08","SET":"07","SEP":"07","OUT":"10","OCT":"10","NOV":"11","DEZ":"12","DEC":"12"}
-        
+
     def ler_MCAeCHN(self):
         output = DataObject.DataObject()
         output.info["SourceType"] = "SpecFile"
@@ -34,7 +34,7 @@ class LerVispect:
 #        print self.tv
         output.info['TempoVivo']   = self.tv
         if self.dt <>"":
-           self.dt = self.dt[0:2]+"/"+self.meses[self.dt[2:5]]+"/20"+self.dt[5:7]+" "+self.hora[0:2]+":"+self.hora[2:4]+":00"             
+           self.dt = self.dt[0:2]+"/"+self.meses[self.dt[2:5]]+"/20"+self.dt[5:7]+" "+self.hora[0:2]+":"+self.hora[2:4]+":00"
         output.info['DataTempo']   = self.dt
         output.info['HoraTempo']   = ""
         output.info['Massa']   = ""
@@ -63,19 +63,19 @@ class LerVispect:
 
     def ler_CHN(self):
         fespec=open(self.arquivo,'rb')
-        # ler dados do CHN espaÁos em branco 
-        p1=fespec.read(8) 
-        # tempo total 
+        # ler dados do CHN espa√ßos em branco
+        p1=fespec.read(8)
+        # tempo total
         p2=fespec.read(4)
-        # tempo vivo 
+        # tempo vivo
         p3=fespec.read(4)
-        # data 
+        # data
         p4=fespec.read(8)
         self.dt=p4
-        # hora 
+        # hora
         p5=fespec.read(4)
         self.hora=p5
-        # espaÁos em branco 
+        # espa√ßos em branco
         p6=fespec.read(4)
 #        print p6
 #        print "Parametros do arquivo CHN - sfontes.chn"
@@ -84,11 +84,11 @@ class LerVispect:
         self.tt=float(unpack('l',p2)[0])/50
 #        print "Tempo Total: %7.1f " % self.tt
 #        print "Tempo Vivo : %7.1f " % self.tv
-      
+
 #        print p4
 #        print unpack('l',p5)[0],
 #        print p6,
-# ler dados do arquivo CHN sÛ as contagens e grava na saida     
+# ler dados do arquivo CHN s√≥ as contagens e grava na saida
         i=0
         a=Numeric.zeros([8200])
         while i<8191:
@@ -96,25 +96,25 @@ class LerVispect:
             i = i + 1
         fespec.close()
         return a
-        
+
     def ler_MCA(self):
-        try:  
+        try:
          fespec=open(self.arquivo,'rb')
-        # espaÁos em branco 
-         p1=fespec.read(32) 
-        # branco 2 
+        # espa√ßos em branco
+         p1=fespec.read(32)
+        # branco 2
          p11=fespec.read(16)
-        # tempo total 
+        # tempo total
          p2=fespec.read(4)
-        # tempo vivo 
+        # tempo vivo
          p3=fespec.read(4)
-        # espacos 
+        # espacos
          p4=fespec.read(8)
-        # espacos 
+        # espacos
          p41=fespec.read(32)
-        # espacos 
+        # espacos
          p42=fespec.read(32)
-        # espacos 
+        # espacos
 #        print "Parametros do arquivo CHN - sfontes.chn"
          self.tv=float(unpack('l',p2)[0])/100
          self.tt=float(unpack('l',p3)[0])/100
@@ -123,7 +123,7 @@ class LerVispect:
 #        print p4
 #        print p41
 #        print p42
-# ler dados do arquivo CHN sÛ as contagens e grava na saida     
+# ler dados do arquivo CHN s√≥ as contagens e grava na saida
          i=0
          a=Numeric.zeros([8200])
          while i<8191:
@@ -134,11 +134,11 @@ class LerVispect:
         except:
          msg = qt.QMessageBox(self)
          msg.setIcon(qt.QMessageBox.Critical)
-         msg.setText("Erro nome do arquivo (acentuaÁ„o!): %s" % (sys.exc_info()[1]))
+         msg.setText("Erro nome do arquivo (acentua√ß√£o!): %s" % (sys.exc_info()[1]))
          msg.exec_()
          a=Numeric.zeros([8200])
          return a
-        
+
 if __name__ == "__main__":
     import sys,time
     try:
@@ -150,6 +150,6 @@ if __name__ == "__main__":
     data = obj.ler_MCAeCHN()
 #    print "data = ",data.y
 #    print "info = ",data.info
-        
 
-        
+
+

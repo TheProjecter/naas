@@ -1,15 +1,15 @@
-# -*- coding: ISO-8859-1 -*-
-# Funções utilizadas para a criação da tabela de resultados do formulario frmresultado.
+# -*- coding: utf-8 -*-
+# FunÃ§Ãµes utilizadas para a criaÃ§Ã£o da tabela de resultados do formulario frmresultado.
 import string, random, math
 from PyQt4 import QtGui, QtCore
- 
+
 ##
 def criarGrade(tb,l,c,cabec):
     te=tb.rowCount()
     for e in range(0,te):
         tb.removeRow(0)
     tb.setRowCount(l)
-    tb.setColumnCount(c)            
+    tb.setColumnCount(c)
 
 def cabecGradeRes(tb):
         headerItem4 = QtGui.QTableWidgetItem()
@@ -57,7 +57,7 @@ def cabecGradeRes(tb):
         tb.setHorizontalHeaderItem(10,headerItem14)
 
         headerItem15 = QtGui.QTableWidgetItem()
-        headerItem15.setText(QtGui.QApplication.translate("frmmenu", "Massa Padrão", None, QtGui.QApplication.UnicodeUTF8))
+        headerItem15.setText(QtGui.QApplication.translate("frmmenu", "Massa PadrÃ£o", None, QtGui.QApplication.UnicodeUTF8))
         tb.setHorizontalHeaderItem(11,headerItem15)
 
 

@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
+
 #/*##########################################################################
 # Copyright (C) 2004-2006 European Synchrotron Radiation Facility
 #
 # This file is part of the PyMCA X-ray Fluorescence Toolkit developed at
 # the ESRF by the Beamline Instrumentation Software Support (BLISS) group.
 #
-# This toolkit is free software; you can redistribute it and/or modify it 
+# This toolkit is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the Free
-# Software Foundation; either version 2 of the License, or (at your option) 
+# Software Foundation; either version 2 of the License, or (at your option)
 # any later version.
 #
 # PyMCA is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -19,9 +21,9 @@
 # Suite 330, Boston, MA 02111-1307, USA.
 #
 # PyMCA follows the dual licensing model of Trolltech's Qt and Riverbank's PyQt
-# and cannot be used as a free plugin for a non-free program. 
+# and cannot be used as a free plugin for a non-free program.
 #
-# Please contact the ESRF industrial unit (industry@esrf.fr) if this license 
+# Please contact the ESRF industrial unit (industry@esrf.fr) if this license
 # is a problem to you.
 #############################################################################*/
 import Numeric
@@ -34,9 +36,9 @@ class DataObject:
 
     def getInfo(self):
         return self.info
-    
+
     def getData(self):
-        return self.data 
+        return self.data
 
     if 0:
         def select(self,selection=None):
@@ -47,15 +49,15 @@ class DataObject:
                 #it will be a new array
                 return copy.deepcopy(self.data)
     else:
-        def select(self,selection=None):            
+        def select(self,selection=None):
             dataObject = DataObject()
             dataObject.info = self.info
             dataObject.info['selection'] = selection
             if selection is None:
-                dataObject.data = self.data 
+                dataObject.data = self.data
                 return dataObject
             if type(selection) == type({}):
-                #dataObject.data = self.data #should I set it to none???    
+                #dataObject.data = self.data #should I set it to none???
                 dataObject.data = None
                 if selection.has_key('rows'):
                     dataObject.x = None
@@ -66,7 +68,7 @@ class DataObject:
                             if rownumber is None:continue
                             if dataObject.x is None:dataObject.x = []
                             dataObject.x.append(self.data[rownumber,:])
-                
+
                     if selection['rows'].has_key('y'):
                         for rownumber in selection['rows']['y']:
                             if rownumber is None:continue
@@ -89,7 +91,7 @@ class DataObject:
                             if rownumber is None:continue
                             if dataObject.x is None:dataObject.x = []
                             dataObject.x.append(self.data[:,rownumber])
-                
+
                     if selection[key].has_key('y'):
                         for rownumber in selection[key]['y']:
                             if rownumber is None:continue
@@ -109,5 +111,5 @@ class DataObject:
                     dataObject.x = [Numeric.arange(ch0,
                                  ch0 + len(dataObject.y[0])).astype(Numeric.Float)]
                 if not dataObject.info.has_key("selectiontype"):
-                    dataObject.info["selectiontype"] = "%dD" % len(dataObject.y) 
+                    dataObject.info["selectiontype"] = "%dD" % len(dataObject.y)
                 return dataObject
