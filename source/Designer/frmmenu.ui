@@ -1,0 +1,991 @@
+<ui version="4.0" >
+ <author>Silvio Rogerio de Lucia - Mario Olimpio de Menezes</author>
+ <class>frmmenu</class>
+ <widget class="QMainWindow" name="frmmenu" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>751</width>
+    <height>510</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>SAANI - Software de Análise por Ativação Neutronica Instrumental</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <property name="autoFillBackground" >
+    <bool>false</bool>
+   </property>
+   <widget class="QWidget" name="verticalLayout" >
+    <property name="geometry" >
+     <rect>
+      <x>170</x>
+      <y>40</y>
+      <width>561</width>
+      <height>441</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" >
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTabWidget" name="tabWidget" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="Preferred" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="currentIndex" >
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tbresultados" >
+        <attribute name="title" >
+         <string>Parametros do Arquivo</string>
+        </attribute>
+        <widget class="QLabel" name="label_6" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>130</y>
+           <width>121</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Tempo Morto</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_3" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>170</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Massa</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>220</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Data</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_4" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>90</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Tempo Vivo</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_5" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>20</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Tipo Arquivo</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_9" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>320</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Desvio padrão</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="lblmorto" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>150</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="lblvivo" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>110</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="txtmassa" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>190</y>
+           <width>121</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QDateTimeEdit" name="txtdatah" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>240</y>
+           <width>130</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="dateTime" >
+          <datetime>
+           <hour>0</hour>
+           <minute>0</minute>
+           <second>0</second>
+           <year>2000</year>
+           <month>1</month>
+           <day>2</day>
+          </datetime>
+         </property>
+         <property name="displayFormat" >
+          <string>dd/MM/yyyy HH:mm:ss</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="txtnivel" >
+         <property name="geometry" >
+          <rect>
+           <x>40</x>
+           <y>290</y>
+           <width>48</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>15</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="txtsigma" >
+         <property name="geometry" >
+          <rect>
+           <x>40</x>
+           <y>360</y>
+           <width>31</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>1</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_8" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>270</y>
+           <width>121</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Nível de sensibilidde</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="rbp" >
+         <property name="geometry" >
+          <rect>
+           <x>30</x>
+           <y>60</y>
+           <width>83</width>
+           <height>18</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Padrão</string>
+         </property>
+         <property name="checkable" >
+          <bool>true</bool>
+         </property>
+         <property name="checked" >
+          <bool>false</bool>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="rba" >
+         <property name="geometry" >
+          <rect>
+           <x>30</x>
+           <y>40</y>
+           <width>83</width>
+           <height>18</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Amostra</string>
+         </property>
+         <property name="checkable" >
+          <bool>true</bool>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QGroupBox" name="groupBox" >
+         <property name="geometry" >
+          <rect>
+           <x>130</x>
+           <y>10</y>
+           <width>421</width>
+           <height>391</height>
+          </rect>
+         </property>
+         <property name="title" >
+          <string>Concentração dos Elementos no Padrão</string>
+         </property>
+         <widget class="QLabel" name="label_2" >
+          <property name="geometry" >
+           <rect>
+            <x>70</x>
+            <y>10</y>
+            <width>53</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="font" >
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text" >
+           <string>Elemento</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="cbElem" >
+          <property name="geometry" >
+           <rect>
+            <x>0</x>
+            <y>30</y>
+            <width>181</width>
+            <height>22</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text" >
+            <string>As-76</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QLabel" name="label_11" >
+          <property name="geometry" >
+           <rect>
+            <x>190</x>
+            <y>10</y>
+            <width>78</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="font" >
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text" >
+           <string>Concentração</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="txtConcentra" >
+          <property name="geometry" >
+           <rect>
+            <x>200</x>
+            <y>30</y>
+            <width>61</width>
+            <height>20</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="cmdIncElem" >
+          <property name="geometry" >
+           <rect>
+            <x>340</x>
+            <y>10</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>Incluir</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="cmdExcElem" >
+          <property name="geometry" >
+           <rect>
+            <x>340</x>
+            <y>30</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>Excluir</string>
+          </property>
+         </widget>
+         <widget class="QTableWidget" name="tbElem" >
+          <property name="geometry" >
+           <rect>
+            <x>4</x>
+            <y>60</y>
+            <width>411</width>
+            <height>311</height>
+           </rect>
+          </property>
+          <property name="rowCount" >
+           <number>0</number>
+          </property>
+          <column>
+           <property name="text" >
+            <string>Elemento</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Energia</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Meia Vida (minutos)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Concentracao</string>
+           </property>
+          </column>
+          <column>
+           <property name="text" >
+            <string>Desv.</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QLabel" name="label_13" >
+          <property name="geometry" >
+           <rect>
+            <x>280</x>
+            <y>10</y>
+            <width>31</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="font" >
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text" >
+           <string>Desv.</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="txtConcentradesv" >
+          <property name="geometry" >
+           <rect>
+            <x>280</x>
+            <y>30</y>
+            <width>48</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="text" >
+           <string>0</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QLabel" name="label_14" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>340</y>
+           <width>121</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>( % 1,2 ou 3)</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tbconcetracao" >
+        <attribute name="title" >
+         <string>Resultado dos Cálculos</string>
+        </attribute>
+        <widget class="QPushButton" name="cmdImpRes" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Imprimir</string>
+         </property>
+        </widget>
+        <widget class="QTableWidget" name="tableWidget" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>30</y>
+           <width>541</width>
+           <height>371</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <column>
+          <property name="text" >
+           <string>Energia</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Area</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>BG</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Resol</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Canal Final</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Canal Inicial</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>LP</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Cps</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>S%</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Elemento</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Meia Vida</string>
+          </property>
+         </column>
+         <column>
+          <property name="text" >
+           <string>Massa Padrão</string>
+          </property>
+         </column>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab" >
+        <attribute name="title" >
+         <string>Resultado das Concentrações</string>
+        </attribute>
+        <widget class="QTabWidget" name="tabWidget_2" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>30</y>
+           <width>531</width>
+           <height>381</height>
+          </rect>
+         </property>
+         <property name="currentIndex" >
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab_2" >
+          <attribute name="title" >
+           <string>Amostra 1</string>
+          </attribute>
+          <widget class="QTableWidget" name="gAmostra1" >
+           <property name="geometry" >
+            <rect>
+             <x>0</x>
+             <y>10</y>
+             <width>521</width>
+             <height>341</height>
+            </rect>
+           </property>
+           <column>
+            <property name="text" >
+             <string>Elementos</string>
+            </property>
+           </column>
+           <column>
+            <property name="text" >
+             <string>P1</string>
+            </property>
+           </column>
+           <column>
+            <property name="text" >
+             <string>P2</string>
+            </property>
+           </column>
+          </widget>
+         </widget>
+        </widget>
+        <widget class="QPushButton" name="cmdImpConcentra" >
+         <property name="geometry" >
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>75</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Imprime</string>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_3" >
+        <attribute name="title" >
+         <string>Projeto</string>
+        </attribute>
+        <widget class="QPushButton" name="cmdcalibracao" >
+         <property name="geometry" >
+          <rect>
+           <x>170</x>
+           <y>147</y>
+           <width>101</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text" >
+          <string>Abrir calibração</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="lblcalibracao" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>180</y>
+           <width>531</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <pointsize>8</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Sem calibração</string>
+         </property>
+         <property name="alignment" >
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="txtdproj1" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>70</y>
+           <width>531</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_7" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>120</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Descrição do Projeto:</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="txtdproj2" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>100</y>
+           <width>531</width>
+           <height>20</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_12" >
+         <property name="geometry" >
+          <rect>
+           <x>230</x>
+           <y>30</y>
+           <width>141</width>
+           <height>20</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <pointsize>12</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Dados do Projeto</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_10" >
+         <property name="geometry" >
+          <rect>
+           <x>10</x>
+           <y>150</y>
+           <width>154</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Clique para abrir calibração</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="horizontalLayout" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>5</y>
+      <width>151</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" >
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <property name="leftMargin" >
+      <number>0</number>
+     </property>
+     <property name="topMargin" >
+      <number>0</number>
+     </property>
+     <property name="rightMargin" >
+      <number>0</number>
+     </property>
+     <property name="bottomMargin" >
+      <number>0</number>
+     </property>
+    </layout>
+   </widget>
+   <widget class="QListWidget" name="lstarqs" >
+    <property name="geometry" >
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>151</width>
+      <height>441</height>
+     </rect>
+    </property>
+    <property name="maximumSize" >
+     <size>
+      <width>16777187</width>
+      <height>16777215</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblProjeto" >
+    <property name="geometry" >
+     <rect>
+      <x>230</x>
+      <y>10</y>
+      <width>721</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font" >
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text" >
+     <string>Sem Projeto.SAN</string>
+    </property>
+    <property name="alignment" >
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblProjeto_2" >
+    <property name="geometry" >
+     <rect>
+      <x>170</x>
+      <y>10</y>
+      <width>54</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font" >
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text" >
+     <string>Projeto: </string>
+    </property>
+    <property name="alignment" >
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+  <action name="actionAbrir" >
+   <property name="text" >
+    <string>Abrir</string>
+   </property>
+   <property name="statusTip" >
+    <string>Abrir Arquivo de Espectro</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionFechar" >
+   <property name="text" >
+    <string>Fechar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Fechar Arquivo de Espectro</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionSair" >
+   <property name="text" >
+    <string>Sair</string>
+   </property>
+   <property name="statusTip" >
+    <string>Sair do SAANI</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionNovo" >
+   <property name="text" >
+    <string>Novo</string>
+   </property>
+   <property name="statusTip" >
+    <string>Iniciar Novo Projeto</string>
+   </property>
+  </action>
+  <action name="actionAbrir_2" >
+   <property name="text" >
+    <string>Abrir</string>
+   </property>
+   <property name="statusTip" >
+    <string>Abrir Projeto Existente</string>
+   </property>
+  </action>
+  <action name="actionSalvar" >
+   <property name="text" >
+    <string>Salvar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Salvar Projeto</string>
+   </property>
+  </action>
+  <action name="actionSalvar_Como" >
+   <property name="text" >
+    <string>Salvar Como</string>
+   </property>
+  </action>
+  <action name="actionFechar_2" >
+   <property name="text" >
+    <string>Fechar</string>
+   </property>
+   <property name="statusTip" >
+    <string>Fechar Projeto</string>
+   </property>
+   <property name="shortcut" >
+    <string/>
+   </property>
+  </action>
+  <action name="actionSobre_o_SAANI" >
+   <property name="text" >
+    <string>Sobre o SAANI</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
