@@ -144,10 +144,21 @@ if __name__ == "__main__":
     try:
         arquivo=sys.argv[1]
     except:
-        print "Chamar por: LerVispect nome-do-arquivo(CHN ou MCA)"
+        print "Chamar por: LerVispect nome-do-arquivo(CHN ou MCA) nome-do-arquivo.dat"
         sys.exit()
     obj = LerVispect(arquivo)
     data = obj.ler_MCAeCHN()
+    try:
+       f = open(sys.argv[2],'w')
+       #print "datax =", data.x
+       print len(data.x[0]), len(data.y[0])
+       for i in range(len(data.x[0])):
+           f.write("%d\t%d\n" % (data.x[0][i],data.y[0][i]))
+       f.flush()
+       f.close()
+       print "espectro gravado em ",sys.argv[2]
+    except:
+       print "erro abrindo arquivo ",sys.argv[2]
 #    print "data = ",data.y
 #    print "info = ",data.info
 
