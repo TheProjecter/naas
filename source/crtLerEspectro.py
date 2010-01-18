@@ -6,7 +6,8 @@
 
 import DataObject
 import string
-import Numeric
+#import Numeric
+import numpy as np
 from struct import *
 
 class LerVispect:
@@ -53,8 +54,8 @@ class LerVispect:
 
 
         ch0 =  0
-        output.x = [Numeric.arange(ch0, ch0 + len(output.data)).astype(Numeric.Float)]
-        output.y = [output.data[:].astype(Numeric.Float)]
+        output.x = [np.arange(ch0, ch0 + len(output.data)).astype(np.float)]
+        output.y = [output.data[:].astype(np.float)]
 #            output.x = []
 #            output.y = []
         output.m = None
@@ -90,7 +91,7 @@ class LerVispect:
 #        print p6,
 # ler dados do arquivo CHN só as contagens e grava na saida
         i=0
-        a=Numeric.zeros([8200])
+        a=np.zeros([8200])
         while i<8191:
             a[i]=unpack('l',fespec.read(4))[0]
             i = i + 1
@@ -125,7 +126,7 @@ class LerVispect:
 #        print p42
 # ler dados do arquivo CHN só as contagens e grava na saida
          i=0
-         a=Numeric.zeros([8200])
+         a=np.zeros([8200])
          while i<8191:
             a[i]=unpack('l',fespec.read(4))[0]
             i = i + 1
@@ -136,7 +137,7 @@ class LerVispect:
          msg.setIcon(qt.QMessageBox.Critical)
          msg.setText("Erro nome do arquivo (acentuação!): %s" % (sys.exc_info()[1]))
          msg.exec_()
-         a=Numeric.zeros([8200])
+         a=np.zeros([8200])
          return a
 
 if __name__ == "__main__":
