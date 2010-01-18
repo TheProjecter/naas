@@ -26,13 +26,14 @@
 # Please contact the ESRF industrial unit (industry@esrf.fr) if this license
 # is a problem to you.
 #############################################################################*/
-import Numeric
+#import Numeric
+import numpy as np
 import copy
 
 class DataObject:
     def __init__(self):
         self.info = {}
-        self.data = Numeric.array([])
+        self.data = np.array([])
 
     def getInfo(self):
         return self.info
@@ -108,8 +109,8 @@ class DataObject:
                         ch0 = int(output.info['Channel0'])
                     else:
                         ch0 = 0
-                    dataObject.x = [Numeric.arange(ch0,
-                                 ch0 + len(dataObject.y[0])).astype(Numeric.Float)]
+                    dataObject.x = [np.arange(ch0,
+                                 ch0 + len(dataObject.y[0])).astype(np.float)]
                 if not dataObject.info.has_key("selectiontype"):
                     dataObject.info["selectiontype"] = "%dD" % len(dataObject.y)
                 return dataObject
