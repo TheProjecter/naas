@@ -18,7 +18,8 @@ qwt = QtBlissGraph.qwt
 import crtLerEspectro
 import os
 import crtCalculos
-import Numeric
+#import Numeric
+import numpy as np
 import math
 from Icons import IconDict
 import crtFuncoes
@@ -36,7 +37,7 @@ import PyMcaPrintPreview
 import threading
 import platform
 
-__version__ = "0.0.20091215"
+__version__ = "0.0.2_20100105"
 
 
 
@@ -59,36 +60,19 @@ class startGui(QtGui.QMainWindow):
 
         curdir = os.getcwd()
         self.Elementos=Elementos.Elementos(curdir+'/db/elementos')
-#        print self.Elementos.elem
-#        print self.Elementos.elem[0][0]
-#        print self.Elementos.elem[0][1]
-#        print self.Elementos.elem[0][2]
-#        print self.Elementos.elem[0][3]
-#        print self.Elementos.elem[1]
-#        print self.Elementos.elem[2]
-#        print self.Elementos.elem[3]
 #" cria objeto para os calculos das areas dos picos e energias  "
         self.vispectfit = crtCalculos.VispectFit()
-        self.pprojeto={}
-        self.pprojeto['slope'] = 0
-        self.pprojeto['offset']= 0
-        self.pprojeto['ro']    = 0
-        self.pprojeto['kres']  = 0
-        self.pprojeto['ArqCalib']  = ''
-        self.pprojeto['titulo1']  = ''
-        self.pprojeto['titulo2']  = ''
         self.dataObjectsDict={}
         self.resConcentracao={}
         self.pAmostra={}
         self.pPadrao={}
         self.pElem={}
         self.amo={}
-        self.projeto=''
-        self.setWindowTitle("SAANI - %s [*]" % os.path.basename(self.projeto))
+#        self.projeto=''
+        self.setWindowTitle(u"SAANI - Versão: %s " % __version__)
         self.carregaGrafico()
         self._carregaElemnetos()
 #" conectando botoes com suas respectivas rotinas "
-        QtCore.QObject.connect(self.ui.cmdcalibracao, QtCore.SIGNAL("clicked()"), self.lerCalibracao)
         QtCore.QObject.connect(self.ui.cmdIncElem, QtCore.SIGNAL("clicked()"), self.incElemento)
         QtCore.QObject.connect(self.ui.cmdExcElem, QtCore.SIGNAL("clicked()"), self.excElemento)
         QtCore.QObject.connect(self.ui.cmdImpRes, QtCore.SIGNAL("clicked()"), self.imprimeResultados)
@@ -106,9 +90,6 @@ class startGui(QtGui.QMainWindow):
         self.vlegend=''
         tb = self._addToolButton(self.openIcon,self.vispectLer,'Abrir Espectro')
         tb = self._addToolButton(self.closeIcon,self.fecharEsp,'Fechar Espectro')
-        tb = self._addToolButton(QtGui.QIcon('icons/open.png'),self.abrirProjeto,'Abrir Projeto')
-        tb = self._addToolButton(QtGui.QIcon('icons/save.png'),self.salvarPro,'Salvar Projeto')
-        tb = self._addToolButton(QtGui.QIcon('icons/close.png'),self.fecharProjeto,'Fechar Projeto')
         tb = self._addToolButton(QtGui.QIcon('icons/exit.png'),self.sair,'Sair')
 #" criando menus Arquivos, Projeto e conectando com suas respectivas rotinas, "
         exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Sair', self)
@@ -123,54 +104,39 @@ class startGui(QtGui.QMainWindow):
         fecharEsp.setShortcut('Ctrl+W')
         fecharEsp.setStatusTip('Fechar/Remover Espectros')
         self.connect(fecharEsp, QtCore.SIGNAL('triggered()'), self.fecharEsp)
-#MElem
-#        manuElem = QtGui.QAction(self.closeIcon, 'Manutenção Tabela de Elementos', self)
-#        manuElem.setShortcut('Ctrl+E')
-#        manuElem.setStatusTip('Manutenção Tabela de Elementos')
-#        self.connect(manuElem, QtCore.SIGNAL('triggered()'), self.manuElem)
-
-        novoProj = self.createAction("&Novo...",self.novoProjeto,None,"new","Novo Projeto")
-        abrirProj = self.createAction("&Abrir",self.abrirProjeto,None,"open","Abrir Projeto")
-        salvarProj = self.createAction("&Salvar",self.salvarPro,None,"save","Salvar o Projeto")
-        salvarComoProj = self.createAction("&Salvar Como...",self.salvarComo,None,"save","Salvar o Projeto com novo nome")
-#        abrirRecente = self.createAction("Recente",self.abrirRecente,None,"open","Projeto Recente")
-        fecharProj = self.createAction("&Fechar",self.fecharProjeto,None,"close","Fechar o Projeto")
         sobreSAANI = self.createAction("&Sobre",self.helpAbout,None,"sobre","Sobre o SAANI")
 
-#        novomenubar = self.menuBar()
-#        novoAqs = novomenubar.addMenu('&Recentes')
-#        novoAqs.addAction(abrirEsp)
-#        novoAqs.addAction(fecharEsp)
-
+        lerCalib = self.createAction(u"&Ler Calibração",self.lerCalibracao,None,None,u"Ler Calibração de um Arquivo")
+        calcCalib = self.createAction(u"&Calcular Calibração",self.calcularCalib,None,None,u"Calcular Calibração a partir do Espectro")
+        entCalib = self.createAction(u"&Entrar Calibração",self.entrarCalib,None,None,u"Digitar parâmetros da Calibração")
         menubar = self.menuBar()
         mnuArquivo = menubar.addMenu('&Arquivo')
         mnuArquivo.addAction(abrirEsp)
         mnuArquivo.addAction(fecharEsp)
 #        mnuArquivo.addAction(manuElem)
         mnuArquivo.addAction(exit)
-        mnuProjeto = menubar.addMenu('&Projeto')
-        mnuProjeto.addAction(novoProj)
-        mnuProjeto.addAction(abrirProj)
-        mnuSProjeto = mnuProjeto.addMenu('Recentes')
-        mnuProjeto.addAction(salvarProj)
-        mnuProjeto.addAction(salvarComoProj)
-#        mnuProjeto.addAction(abrirRecente)
-#        mnuProjeto.addAction(novomenubar)
-        mnuProjeto.addAction(fecharProj)
+        mnuCalibrate = menubar.addMenu(u'&Calibração')
+        mnuCalibrate.addAction(lerCalib)
+        mnuCalibrate.addAction(calcCalib)
+        mnuCalibrate.addAction(entCalib)
+        mnuAnalise = menubar.addMenu(u'&Análises')
+
+        mnuSobre = menubar.addMenu('&Help')
+        mnuSobre.addAction(sobreSAANI)
+
+#createAction(self, text, slot=None, shortcut=None, icon=None, tip=None, checkable=False, signal="triggered()")
 
         # recupera variavel de ambiente recentefiles
         self.settings = QtCore.QSettings()
         self.recenteFiles=[]
         recenteFiles = self.settings.value("RecenteFiles").toList()
-        mnuProjeto.addSeparator()
+        mnuArquivo.addSeparator()
         for arq in recenteFiles[:]:
             self.recenteFiles+=[arq.toString()]
-            aq1 = self.createAction(arq.toString(),self.abreRecente,False,"open","aq1 recente",None,"triggered()")
+            aq1 = self.createAction(arq.toString(),self.abrirEsp,False,"open","aq1 recente",None,"triggered()")
             self.ultimo=aq1
-            mnuSProjeto.addAction(aq1)
+            mnuArquivo.addAction(aq1)
 
-        mnuSobre = menubar.addMenu('&Help')
-        mnuSobre.addAction(sobreSAANI)
 
         self.dirty = False
 ##        self.createStatusBar()
@@ -190,21 +156,29 @@ class startGui(QtGui.QMainWindow):
         #status.showMessage("Ready", 5000)
 
 
+    def createAction(self, text, slot=None, shortcut=None, icon=None,
+                 tip=None, checkable=False, signal="triggered()"):
+        """ classe startGui - __init__
+            cria acoes para o menu da janela principal"""
+        action = QtGui.QAction(text, self)
+        if icon is not None:
+           action.setIcon(QtGui.QIcon("icons/%s.png" % icon))
+        if shortcut is not None:
+           action.setShortcut(shortcut)
+        if tip is not None:
+           action.setToolTip(tip)
+           action.setStatusTip(tip)
+        if slot is not None:
+           self.connect(action, QtCore.SIGNAL(signal), slot)
+        if checkable:
+           action.setCheckable(True)
+        return action
 
+    def calcularCalib(self):
+        pass
 
-
-#    def manuElem(self):
-#        """      """
-#        print "teste"
-#        a=crtManElementos.crtManElementos()
-#        a.exec_loop()
-#        Form = QtGui.QWidget()
-#        ui = frmElementos.Ui_Form()
-#        ui.setupUi(Form)
-#        Form.show()
-#        #Form.setWindowModality(QtCore.Qt.WindowModal)
-#        Form.exec_()
-
+    def entrarCalib(self):
+        pass
 
     def abreRecente(self):
         """ Executa sempre que fechar a janela
@@ -234,40 +208,40 @@ class startGui(QtGui.QMainWindow):
         filenames = QtCore.QVariant(self.recenteFiles)
         self.settings.setValue("RecenteFiles", filenames)
 
-##\    def updateStatus(self, message,timeout=0):
-##        self.statusBar().showMessage(message, timeout)
+    def updateStatus(self, message,timeout=0):
+        self.statusBar().showMessage(message, timeout)
 
 
         ## connections
-        #self.connect(self.sw, SIGNAL("okClicked"),
-                    #self.rw.create)
-        #self.connect(self.rw.table, SIGNAL("progressChanged"),
-                     #self.update_progress)
-        #self.connect(self.rw.table, SIGNAL("displayFinished"),
-                     #self.hide_progress_bar)
+#        self.connect(self.sw, SIGNAL("okClicked"),
+#                    self.rw.create)
+#        self.connect(self.rw.table, SIGNAL("progressChanged"),
+#                     self.update_progress)
+#        self.connect(self.rw.table, SIGNAL("displayFinished"),
+#                     self.hide_progress_bar)
 
 
 
-##    def update_progress(self, n, nrows):
-#        self.pb.show()
-#        self.pb.setRange(0, nrows)
-#        self.pb.setValue(n)
-#        self.statusBar().showMessage(self.tr("Trabalhando..."))
-#
-#    def hide_progress_bar(self):
-#        self.pb.hide()
-#        self.statusBar().showMessage(self.tr("Finalizado..."))
-#
-#    def createStatusBar(self):
-#            sb = QtGui.QStatusBar()
-#            sb.setFixedHeight(18)
-#            self.setStatusBar(sb)
-#            self.statusBar().showMessage(self.tr("SAANI pronto!"))
+    def update_progress(self, n, nrows):
+        self.pb.show()
+        self.pb.setRange(0, nrows)
+        self.pb.setValue(n)
+        self.statusBar().showMessage(self.tr("Trabalhando..."))
+
+    def hide_progress_bar(self):
+        self.pb.hide()
+        self.statusBar().showMessage(self.tr("Finalizado..."))
+
+    def createStatusBar(self):
+            sb = QtGui.QStatusBar()
+            sb.setFixedHeight(18)
+            self.setStatusBar(sb)
+            self.statusBar().showMessage(self.tr("SAANI pronto!"))
 ##
     def helpAbout(self):
         QtGui.QMessageBox.about(self, "Sobre o SAANI",
                 """<b>Software de An&aacute;lise por Ativa&ccedil;&otilde;o com Neutrons Instrumental</b> v %s
-                <p>Copyright &copy; 2008 Grupo de Computa&ccedil;&atilde;o Cient&iacute;fica do IPEN.
+                <p>Copyright &copy; 2008-2010 Grupo de Computa&ccedil;&atilde;o Cient&iacute;fica do IPEN.
                 <p>Todos os direitos reservados.
                 <p>Autores: S&iacute;lvio Rog&eacute;rio de L&uacute;cia e M&aacute;rio O. de Menezes
 
@@ -295,14 +269,11 @@ class startGui(QtGui.QMainWindow):
         curdir = os.getcwd()
         self.Elementos=Elementos.Elementos(curdir+'/db/elementos')
 
-    def abrirProjeto(self):
-        """ Menu: Projeto - Abrir Projeto
-         executa rotina para abertura do projeto ja salvo """
-        self.abrirProj(1)
-
     def verificaAbas(self):
         """ Objeto: tabWidget - quadro de abas
-         executa rotina para verificar a movimentaï¿½ï¿½o das abas da janela principal """
+         executa rotina para verificar a movimentação das abas da janela principal """
+        currentTab = self.ui.tabWidget.currentIndex()
+        print "Aba atual: ", currentTab
         self.ver_abas()
 
     def imprimeGrafico(self):
@@ -327,145 +298,17 @@ class startGui(QtGui.QMainWindow):
             return
         legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
         self.ui.lstarqs.takeItem(self.ui.lstarqs.currentRow())
-        self.dataObjectsDict[legend]=''
-        self.vlegend=legend
-        self.dirty = True
-        self.setWindowModified(self.dirty)
-
-    def fecharProjeto(self):
-        """ Menu: Projeto - Fechar Projeto
-        serve para fechar um projeto verifica se existe um projeto aberto, se sim executa
-        rotina novoProjeto para limpar as variaveis """
-#        self.dirty = True
-#        print "Fechar"
-#        self.okToContinue()
-        if not self.okToContinue():
-            return
-
-        if self.projeto == '':
-            msg = qt.QMessageBox(self)
-            msg.setIcon(qt.QMessageBox.Critical)
-            msg.setText("Nenhum projeto aberto para ser fechado!")
-            msg.exec_()
-            return
-        self.pprojeto['slope'] = 0
-        self.pprojeto['offset']= 0
-        self.pprojeto['ro']    = 0
-        self.pprojeto['kres']  = 0
-        self.pprojeto['ArqCalib']  = ''
-        self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
-        self.dirty = False
-        self.projeto = ''
-        self.novoProjeto()
-        self.ui.lblProjeto.setText("")
-
-
-
-    def novoProjeto(self):
-        """Menu: Projeto - Novo Projeto
-          limpar as variaveis para abertura ou contruï¿½ï¿½o de um novo projeto"""
-
-        if not self.okToContinue():
-            return
-
-        self.ui.lstarqs.clear()
-        self.dataObjectsDict={}
-        " limpar tela do grafico"
-        self.graph.clearcurves()
-        curveinfo={}
-        " limpar elemntos - dos padroes "
-        self.ui.tbElem.clear()
-        "limpar tabelas de resultados/concentração e nome do projeto"
-        self.ui.tableWidget.clear()
-        self.ui.gAmostra1.clear()
-        self.ui.lblProjeto.setText("")
-
-    def salvarComo(self):
-        """Menu: Projeto - Salvar Como
-           salva projeto com novo nome, abre janela para entrada do nome do projeto
-           e executa rotina salvarProjeto """
-        cwd = os.getcwd()
-        olddirt = self.dirty
-        outfile = qt.QFileDialog(self)
-        outfile.setFilter('*.san')
-        outfile.setFileMode(outfile.AnyFile)
-        outfile.setAcceptMode(qt.QFileDialog.AcceptSave)
-        if os.path.exists(self.configDir):cwd =self.configDir
-        outfile.setDirectory(cwd)
-        ret = outfile.exec_()
-        if ret:
-            filterused = str(outfile.selectedFilter()).split()
-            extension = ".san"
-            try:
-                outdir=str(outfile.selectedFiles()[0])
-            except:
-                msg = qt.QMessageBox(self)
-                msg.setIcon(qt.QMessageBox.Critical)
-                msg.setText("Erro nome do arquivo (acentuação!): %s" % (sys.exc_info()[1]))
-                msg.exec_()
-                return
-            try:
-                outputDir  = os.path.dirname(outdir)
-            except:
-                outputDir  = "."
-            try:
-                outputFile = os.path.basename(outdir)
-            except:
-                outputFile  = "Projeto1.san"
-            outfile.close()
-            del outfile
-        else:
-            outfile.close()
-            del outfile
-            return
-        if len(outputFile) < len(extension[:]):
-            outputFile += extension[:]
-        elif outputFile[-4:] != extension[:]:
-            outputFile += extension[:]
-        filename = os.path.join(outputDir, outputFile)
-        if os.path.exists(filename):
-            try:
-                os.remove(filename)
-            except IOError:
-                msg = qt.QMessageBox(self)
-                msg.setIcon(qt.QMessageBox.Critical)
-                msg.setText("Erro: %s" % (sys.exc_info()[1]))
-                msg.exec_()
-                return
         try:
-            self.salvarProjeto(filename)
-            self.configDir = outputDir
-            self.ui.lblProjeto.setText(filename)
-            self.projeto = filename
-            self.dirty = False
-            self.setWindowTitle("SAANI - %s [*]" % filename)
-            self.setWindowModified(self.dirty)
-            self.addRecenteFiles(filename)
-        except:
+            del(self.dataObjectsDict[legend])
+        except KeyError:
             msg = qt.QMessageBox(self)
             msg.setIcon(qt.QMessageBox.Critical)
-            msg.setText("Erro Salvando Projeto: %s" % (sys.exc_info()[1]))
-            msg.exec_()
-            self.dirty = olddirt
-            return
-
-    def salvarPro(self):
-        """ menu: Projeto - Salvar
-            executa a rotina salvarProjeto com o nome e caminho do projeto corrente(ativo)"""
-        if self.projeto == '':
-            msg = qt.QMessageBox(self)
-            msg.setIcon(qt.QMessageBox.Critical)
-            msg.setText("Nenhum projeto aberto para ser salvo!")
+            msg.setText(u"Erro ao remover espectro!")
             msg.exec_()
             return
-        self.salvarProjeto(self.projeto)
-
-    def salvarRecenteProjeto(self,pfilename):
-        """ da rotina: sair
-            executa quando clicado no menu sair, grava arquivo: recentes"""
-        f = open(pfilename, 'w') # no Windows
-        f.write("%s" %(self.ui.lblProjeto.text()))
-        f.close
+        self.vlegend=legend
+#        self.dirty = True
+#        self.setWindowModified(self.dirty)
 
     def updateRecenteFiles(self,parqcaminho):
         self.recenteFiles[2]=self.recenteFiles[1]
@@ -473,48 +316,6 @@ class startGui(QtGui.QMainWindow):
         self.recenteFiles[0]=parqcaminho
 
 
-    def salvarProjeto(self,pfilename):
-        """ da rotina: salvapro
-            salva projeto no arquivo e caminho passado no parametro pfilename
-            o arquivo gerado tem extensao .SAN e eh um arq. texto, onde eh gravado todos os dados dos
-            espectros contagens dos canais, nome do arquivo, e os dados adicionais (.info)"""
-        f = open(pfilename, 'w') # no Windows
-        self.pprojeto['titulo1']  = str(self.ui.txtdproj1.text())
-        self.pprojeto['titulo2']  = str(self.ui.txtdproj2.toPlainText())   # QTextEdit
-        f.write("PROJ#%s#\n" %(self.pprojeto))
-        n=self.ui.lstarqs.count()
-        for j in range(0,n):
-            legend="%s" %(self.ui.lstarqs.item(j).text())
-##            self.updateStatus(legend)
-##            self.update_progress(j,n)
-            f.write("ARQ#%s#\n" %(legend))
-            f.write("INFO#%s#\n" %(self.dataObjectsDict[legend].info))
-            f.write("Y#%s#\n" %(self.dataObjectsDict[legend].y))
-            f.write("FY#\n")
-        f.close
-#        self.updateRecenteFiles(pfilename)
-##        self.hide_progress_bar()
-        self.dirty = False
-        self.setWindowTitle("SAANI - %s [*]" % pfilename)
-        self.setWindowModified(self.dirty)
-
-    def createAction(self, text, slot=None, shortcut=None, icon=None,
-                 tip=None, checkable=False, signal="triggered()"):
-        """ classe startGui - __init__
-            cria acoes para o menu da janela principal"""
-        action = QtGui.QAction(text, self)
-        if icon is not None:
-           action.setIcon(QtGui.QIcon("icons/%s.png" % icon))
-        if shortcut is not None:
-           action.setShortcut(shortcut)
-        if tip is not None:
-           action.setToolTip(tip)
-           action.setStatusTip(tip)
-        if slot is not None:
-           self.connect(action, QtCore.SIGNAL(signal), slot)
-        if checkable:
-           action.setCheckable(True)
-        return action
 
     def _carregaElemnetos(self):
         """ classe startGui - __init__
@@ -571,8 +372,8 @@ class startGui(QtGui.QMainWindow):
         self.ui.tbElem.setItem(n,3,valor)
         valor=QtGui.QTableWidgetItem("%f" % float(self.ui.txtConcentradesv.text()), QtGui.QTableWidgetItem.Type)
         self.ui.tbElem.setItem(n,4,valor)
-        self.dirty = True
-        self.setWindowModified(self.dirty)
+#        self.dirty = True
+#        self.setWindowModified(self.dirty)
 
 
     def excElemento(self):
@@ -594,7 +395,7 @@ class startGui(QtGui.QMainWindow):
             curveinfo={}
             self.graph.newCurve(legend,x,
                                     y,
-                                    logfilter=1, curveinfo=curveinfo)
+                                    logfilter=1, curveinfo=None) #curveinfo)
             self.graph.replot()
             self.ui.tabWidget.setCurrentIndex(0)
 
@@ -640,6 +441,11 @@ class startGui(QtGui.QMainWindow):
         y = 2 * serifLineHeight
         pageHeight = self.painter.window().height() - 2 * serifLineHeight;
         xpgnumber = pageRect.width()- 1.5 * fm.width("Pagina 123")
+
+        if self.dataObjectsDict[legend].info['FakeCal']:
+            calibra = qt.QString("%l").arg("Sem Calibração - Cuidado").rightJustified(15)
+            self.painter.drawText(x,y,calibra)
+        y += 1 * serifLineHeight
         for a in range(0,len(self.amo)):
             self.painter.save()
             self.painter.setFont(serifFont)
@@ -691,13 +497,15 @@ class startGui(QtGui.QMainWindow):
 
     def calConcentra(self):
         """ da rotina: ver_abas - que verifica a movimentacao das abas na janela principal
-            eh executada quando entra na aba Resultado das Concentracoes e efetua o calculo das concentracoes
-            para cada arquivo (espectro) adicionado no projeto e ja identificado como amostra e/ou padrao
-            a rotina identifica cada um dos arquivos e separa entre amostra e padrao
-            se for padrao identifica os elemntos e suas concentracoes para efetuar o calculo
-            para cada amostra atraves dos resultados ja calculos das areas dos picos, energias e atividades
-            encontra os elementos apontados em cada padrao, efetuando entï¿½o o calculo de cada concentracao
-            para cada padrao em referencia a amostra, por fim exibe os resultados no video em forma de abas e tabelas"""
+            eh executada quando entra na aba Resultado das Concentracoes e efetua o calculo
+            das concentracoes para cada arquivo (espectro) adicionado no projeto e ja identificado
+            como amostra e/ou padrao a rotina identifica cada um dos arquivos e separa entre
+            amostra e padrao se for padrao identifica os elemntos e suas concentracoes para
+            efetuar o calculo para cada amostra atraves dos resultados ja calculos das areas
+            dos picos, energias e atividades encontra os elementos apontados em cada padrao,
+            efetuando então o calculo de cada concentracao para cada padrao em referencia a
+            amostra, por fim exibe os resultados no video em forma de abas e tabelas
+        """
         self.ui.tabWidget_2.clear()
         self.resConcentracao={}
         pElem={}
@@ -717,7 +525,7 @@ class startGui(QtGui.QMainWindow):
                pPadrao[nP]=legend
                nP=nP+1
                pe=len(pElem)
-               # colocar o padrï¿½o concentraï¿½ï¿½o em cada emento
+# colocar o padrão concentração em cada emento
                for k in range(0,pe):
                   legCon={}
                   legCon["conP"]=0
@@ -756,7 +564,7 @@ class startGui(QtGui.QMainWindow):
                nA=nA+1
         pe=len(pElem)
         intervalo = 1.6
-# ---- mostra os elementos e as concentraï¿½ï¿½es em cada padrï¿½o
+# ---- mostra os elementos e as concentrações em cada padrão
         self.pAmostra=pAmostra
         self.pPadrao=pPadrao
         self.pElem=pElem
@@ -789,8 +597,6 @@ class startGui(QtGui.QMainWindow):
                       errCon=0
                    else:
                       con=(cpsA * massaP * float(pElem[e][pPadrao[p]]["conP"]) * math.exp(-lambd * difdt)) / (cpsP * massaA)
-    #                  print 'con----------------------------------------------------------------------------'
-    #                  print '%f = (%f * %f * %f * math.exp(%f * %f)) / ( %f * %f) ' %(con, cpsA, massaP, float(pElem[e][pPadrao[p]]["conP"]), lambd,difdt, cpsP, massaA)
                       if (cpsA == 0):
                          errCon=0
                       else:
@@ -798,8 +604,6 @@ class startGui(QtGui.QMainWindow):
                            errCon= con * math.sqrt((((sA * cpsA) / 100) / cpsA)**2 + (((sP * cpsP) / 100) / cpsP)**2 )
                         else:
                            errCon= con * math.sqrt((((sA * cpsA) / 100) / cpsA)**2 + (((sP * cpsP) / 100) / cpsP)**2 + (((float(pElem[e][pPadrao[p]]["conPD"]) / float(pElem[e][pPadrao[p]]["conP"])) ))**2)
-    #                  print '%f = %f * (%f * %f)/100 / %f) + (%f * %f)/100 / %f) + (%f / %f)' %(errCon, con,sA, cpsA, cpsA, sP, cpsP, cpsP, float(pElem[e][pPadrao[p]]["conPD"]), float(pElem[e][pPadrao[p]]["conP"]))
-    #                  print 'err----------------------------------------------------------------------------'
                    d={}
                    d["conF"]=con
                    d["conE"]=errCon
@@ -814,7 +618,7 @@ class startGui(QtGui.QMainWindow):
            self.gAmostra1 = QtGui.QTableWidget(self.tabn)
            self.gAmostra1.setGeometry(QtCore.QRect(0,0,741,391))
            self.gAmostra1.setObjectName("gAmostra1")
-# dentro da table Widget_2 adiciona a aba jï¿½ com o table
+# dentro da table Widget_2 adiciona a aba já com o table
            self.gAmostra1.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
            self.ui.tabWidget_2.addTab(self.tabn,"")
            self.ui.tabWidget_2.setTabText(self.ui.tabWidget_2.indexOf(self.tabn), pAmostra[a])
@@ -850,118 +654,35 @@ class startGui(QtGui.QMainWindow):
                  col=col+2
               lin =lin + 1
 
-    def abrirProj(self,recent,arq=""):
-        """ da rotina: abrirProjeto do menu Projeto - Abrir Projeto
-            executa rotina para abertura do projeto ja salvo
-            atualiza todas as variaveis, carregando o projeto atraves da leitura do arquivo
-            utiliza o parametro recent para abertura do arquivo mais recente se for o caso """
-        vys=''
-        if recent==0:
-           ret=1
-           if (arq==""):
-              vfile = self.ui.lblProjeto.text()
-           else:
-              vfile = arq
-        else:
-           cwd = os.getcwd()
-           openfile = qt.QFileDialog(self)
-           openfile.setFilter('*.san')
-           openfile.setFileMode(openfile.ExistingFile)
-           openfile.setAcceptMode(qt.QFileDialog.AcceptOpen)
-           if os.path.exists(self.configDir):cwd =self.configDir
-           openfile.setDirectory(cwd)
-           ret = openfile.exec_()
-# coloquei devido a problemas com arquivo ou diretorio com acentuacao
-           try:
-             vfile=str(openfile.selectedFiles()[0])
-           except:
-             msg = qt.QMessageBox(self)
-             msg.setIcon(qt.QMessageBox.Critical)
-             msg.setText("Erro nome do arquivo (acentuação!): %s" % (sys.exc_info()[1]))
-             msg.exec_()
-             return
-        if os.path.exists(vfile) and ret == 1:
-            if self.projeto == '':
-               self.novoProjeto()
-            else:
-               self.fecharProjeto()
-            fileToOpen = open(vfile)
-            initialFile = fileToOpen.readlines()
-            self.projeto=vfile
-#            self.ui.setWindowTitle("SAANI - Software de Anï¿½lise por Ativaï¿½ï¿½o Neutronica Instrumental - "+vfile)
-            self.ui.lblProjeto.setText(vfile)
-            indlegend=''
-            vn=0
-            nl = len(initialFile) # numero de linhas para a barra de progresso
-            for linha in initialFile:
-                vlinha=string.strip(linha)
-                vn=vn+1
-##                self.update_progress(vn,nl)
-                if vlinha[0:3] == 'ARQ':
-                   sep=string.split(vlinha,'#')
-                   indlegend=string.strip(sep[1])
-                   self.ui.lstarqs.addItem(indlegend)
-                   output = DataObject.DataObject()
-                   output.data=Numeric.zeros([8200])
-                   ch0 =  0
-                   output.x = [Numeric.arange(ch0, ch0 + len(output.data)).astype(Numeric.Float)]
-                   output.y = [output.data[:].astype(Numeric.Float)]
-                   self.dataObjectsDict[indlegend]=output
-##                   self.updateStatus("%s" % ("Abrindo arquivo: " + indlegend))
-                if vlinha[0:4] == 'PROJ':
-                   sep=string.split(vlinha,'#')
-                   self.pprojeto=eval(sep[1])
-                   self.ui.txtdproj1.setText(self.pprojeto['titulo1'])
-                   self.ui.txtdproj2.setPlainText(self.pprojeto['titulo2'])
-                   self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
-                if vlinha[0:4] == 'INFO':
-                   sep=string.split(vlinha,'#')
-                   self.dataObjectsDict[indlegend].info=eval(sep[1])
-                if vlinha[0:1] == 'Y':
-                   sep=string.split(vlinha,'#')
-                   vys=sep[1]
-                else:
-                   if vlinha[0:2] == 'FY':
-                      vys="Numeric."+vys[1:len(vys)-2]
-                      vt=eval(vys)
-                      li={}
-                      self.dataObjectsDict[indlegend].y[0]=eval(vys)
-                      self.dataObjectsDict[indlegend].x[0]= Numeric.arange(0, len(self.dataObjectsDict[indlegend].y[0])).astype(Numeric.Float)
-                   else:
-                      vys=vys+string.strip(vlinha)
-
-            # acho tb que devemos mudar a estrutura do arquivo de projeto.
-            # guardar os espectros dentro dele nao eh uma boa ideia - me parece!
-            # aqui deve vir a chamada para fazer o calculo em background
-            # vou chamar uma funcao/classe fazCalculos que recebera a lista de arquivos de
-            # espectro e calculara um por um
-
-            self.setWindowTitle("SAANI - %s [*] " % self.projeto)
-
-##            self.hide_progress_bar()
-
-            fc = fazCalculos(self.ui.lstarqs)
-            self.threads.append(fc)
-            fc.start()
-            self.addRecenteFiles(vfile)
-            self.ui.lstarqs.setCurrentRow(0)
-            self.clicklst()
-            legend = self.graph.getactivecurve(justlegend = 1)
-            self.vlegend=legend
-
     def lerCalibracao(self):
-        """ Botao: cmdcalibracao - aba Projeto
+        """ Botao: cmdcalibracao -
             abre janela para localizar arquivo de calibracao do sistema (equipamento que efetuou a contagem)
             efetua a leitura e armazena os dados na variavel self.pprojeto, para posterior uso no calculo
-            das areas dos picos, energias e atividades """
+            das areas dos picos, energias e atividades
+
+            E preciso ter um espectro aberto para ler a calibração para ele.
+            Calibração é individual - por espectro;
+            Pode-se, entretanto, atribuir a mesma calibração já lida a um novo espectro.
+        """
+
+
+        try:
+            legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
+        except:
+             msg = qt.QMessageBox(self)
+             msg.setIcon(qt.QMessageBox.Critical)
+             msg.setText("Nenhum espectro aberto!\nAbra primeiro um Espectro!!")
+             msg.exec_()
+             return
+
         cwd = os.getcwd()
         openfile = qt.QFileDialog(self)
         openfile.setFilter('*.cal')
         openfile.setFileMode(openfile.ExistingFile)
         openfile.setAcceptMode(qt.QFileDialog.AcceptOpen)
-        print "diretorios "
-        print cwd
-        print self.configDir
+#        print "diretorios "
+#        print cwd
+#        print self.configDir
 
         if os.path.exists(self.configDir):cwd =self.configDir
         openfile.setDirectory(cwd)
@@ -978,49 +699,54 @@ class startGui(QtGui.QMainWindow):
         if os.path.exists(vfile):
             fileToOpen = open(vfile)
             initialFile = [string.split(line) for line in fileToOpen]
-            self.pprojeto['slope'] = float(initialFile[0][1])
-            self.pprojeto['offset']= float(initialFile[0][2])
-            self.pprojeto['ro']    = float(initialFile[1][0])
-            self.pprojeto['kres']  = float(initialFile[1][1])
-            self.pprojeto['ArqCalib']  = "%s" %(vfile)
-            self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
-            self.dirty = True
-            self.setWindowModified(self.dirty)
+            self.dataObjectsDict[legend].info['slope'] =  float(initialFile[0][1])
+            self.dataObjectsDict[legend].info['offset']=  float(initialFile[0][2])
+            self.dataObjectsDict[legend].info['ro']    =  float(initialFile[1][0])
+            self.dataObjectsDict[legend].info['kres']  =  float(initialFile[1][1])
+            self.dataObjectsDict[legend].info['ArqCalib']  = "%s" %(vfile)
+            self.dataObjectsDict[legend].info['FakeCal']=False
+            #self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
+#            self.dirty = True
+#            self.setWindowModified(self.dirty)
             self.projeto='Projeto1.san'
             return 0
         else:
             raise "IOError",("Arquivo não existe %s " % vfile)
-            self.pprojeto['slope'] = 0
-            self.pprojeto['offset']= 0
-            self.pprojeto['ro']    = 0
-            self.pprojeto['kres']  = 0
-            self.pprojeto['ArqCalib']  = ''
-            self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
+            self.dataObjectsDict[legend].info['slope'] =   1.0
+            self.dataObjectsDict[legend].info['offset']=   0.0
+            self.dataObjectsDict[legend].info['ro']    =   0.0
+            self.dataObjectsDict[legend].info['kres']  =   1.0
+            self.dataObjectsDict[legend].info['ArqCalib']   = ''
+            #self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
             return 1
 
     def consiste(self):
-        """ da rotina: ver_abas - que verifica a movimentaï¿½ï¿½o das abas
-            quando entra na aba - Resultado de Concentracoes executa esta rotrina para consistencia dos dados
-            verificando se o arquivo de calibraï¿½ï¿½o do Arquivo ja foi lido, se esta Faltando a Massa do Arquivo
-            de espectro para o calculo, se existe Elemesntos lancados para o Padrï¿½o, se tem os arquivos de
-            amostra e padrao para os calculos
+        """ da rotina: ver_abas - que verifica a movimentação das abas
+            quando entra na aba - Resultado de Concentracoes executa esta rotrina para
+            consistencia dos dados verificando se o arquivo de calibração do Arquivo ja
+            foi lido, se esta Faltando a Massa do Arquivo de espectro para o calculo,
+            se existe Elementos lancados para o Padrão, se tem os arquivos de amostra
+            e padrao para os calculos
             retorna 1 se deu erro
             retorna 0 se OK """
         smsg=""
         padrao=0
         amostra=0
         n=self.ui.lstarqs.count()
+        if n == 0:
+            smsg = u"Nenhum espectro lido"
+            return 1, smsg
         for j in range(0,n):
             legend="%s" %(self.ui.lstarqs.item(j).text())
-            if (self.dataObjectsDict[legend].info['ArqCalib']  == ''):
-               smsg = "Entrar com o arquivo de calibração do Arquivo: %s" %(legend)
+            if (self.dataObjectsDict[legend].info['FakeCal']  == True):
+               smsg = u"Entrar com o arquivo de calibração do Arquivo: %s" % (legend)
                return 1,smsg
             if (self.dataObjectsDict[legend].info['Massa']==""):
-               smsg = "Falta a Massa do Arquivo: %s" %(legend)
+               smsg = u"Falta a Massa do Arquivo: %s" %(legend)
                return 1,smsg
             if (self.dataObjectsDict[legend].info['Amostra'] == 2):
                if self.dataObjectsDict[legend].info['lElem'] == '':
-                  smsg = "Elementos do Padrao, Arquivo: %s" %(legend)
+                  smsg = u"Elementos do Padrao, Arquivo: %s" %(legend)
                   return 1,smsg
                padrao=1
             if (self.dataObjectsDict[legend].info['Amostra'] == 1):
@@ -1033,8 +759,9 @@ class startGui(QtGui.QMainWindow):
 
     def ver_abas_padrao(self):
         """ Objeto: rba - botao de opcao (amostra ou padrao) da aba de parametros
-           Se for padrao deixa visivel a entrada dos dados da Concentraï¿½ï¿½o dos Elementos no Padrï¿½o
-           Se for amostra deixa invisivel esta entrada"""
+           Se for padrao deixa visivel a entrada dos dados da Concentração dos Elementos no Padrão
+           Se for amostra deixa invisivel esta entrada
+        """
         if self.ui.rba.isChecked():
             self.ui.groupBox.setVisible(0)
         else:
@@ -1042,7 +769,8 @@ class startGui(QtGui.QMainWindow):
 
     def ver_abas(self):
         """ da rotina: verifcaAbas do Objeto: tabWidget - quadro de abas
-            verificar a movimentaï¿½ï¿½o das abas da janela principal e excuta procedimentos especificos para cada uma delas
+            verificar a movimentação das abas da janela principal e excuta procedimentos
+            especificos para cada uma delas
             self.ui.tabWidget.currentIndex() ==
              0:Grafico - nao executa nada
              1:Parametros - recupera os dados da variavel global e exibe na janela
@@ -1053,31 +781,26 @@ class startGui(QtGui.QMainWindow):
              4: indica que saiu da aba Projetos entao efetua consistencias: se deu entrada dos
                dados de calibracao e se ja salvou o projeto
              1: indica que saiu da aba Parametros entao identifica se eh amostra ou padrao
-               aguarda os dados (parametros) na variavel de global para o arquivo (espectro)"""
+               aguarda os dados (parametros) na variavel de global para o arquivo (espectro)
+        """
         if self.saiuAba == 4:
-           if self.pprojeto['ArqCalib'] == '':
-              msg = qt.QMessageBox(self)
-              msg.setIcon(qt.QMessageBox.Critical)
-              msg.setText(u"Sem arquivo de calibração, não pode calcular!")
-              msg.exec_()
-              self.saiuAba = 0
-              self.ui.tabWidget.setCurrentIndex(4)
-              return
-           self.pprojeto['titulo1']  = str(self.ui.txtdproj1.text())
-           self.pprojeto['titulo2']  = str(self.ui.txtdproj2.toPlainText())
+           self.dataObjectsDict[legend].info['FakeCal']=True
+           #self.pprojeto['slope'] = 1.0
+           #self.pprojeto['offset']= 0.0
+           #self.pprojeto['ro']    = 1.0
+           #self.pprojeto['kres']  = 1.0
+           #self.pprojeto['ArqCalib']  = ""
+           self.saiuAba = 0
+           self.ui.tabWidget.setCurrentIndex(0)
+#              return
+           #self.pprojeto['titulo1']  = str(self.ui.txtdproj1.text())
+           #self.pprojeto['titulo2']  = str(self.ui.txtdproj2.toPlainText())
            self.saiuAba = 0
 #           if self.projeto == '':
 #              self.salvarComo()
 
         if self.saiuAba == 1:
          try:
-           if (self.projeto == ''):
-              msg = qt.QMessageBox(self)
-              msg.setIcon(qt.QMessageBox.Critical)
-              msg.setText("Nenhum projeto aberto!")
-              msg.exec_()
-              self.ui.tabWidget.setCurrentIndex(4)
-              return
            legend = self.graph.getactivecurve(justlegend = 1)
            if self.ui.rba.isChecked():
               self.dataObjectsDict[self.vlegend].info['Amostra']=1
@@ -1098,14 +821,9 @@ class startGui(QtGui.QMainWindow):
                  self.dataObjectsDict[self.vlegend].info['lElem']=lElem
               else:
                  print "Erro selecione tipo amostra ou padrão"
-           #print self.dataObjectsDict[self.vlegend].info['TempoVivo']
            self.dataObjectsDict[self.vlegend].info['TempoVivo']=float(self.ui.lblvivo.text())
            self.dataObjectsDict[self.vlegend].info['TempoTotal']=float(self.ui.lblmorto.text())
            self.dataObjectsDict[self.vlegend].info['DataTempo']=("%s" %(self.ui.txtdatah.text()))
-           #print self.vlegend
-           #print self.dataObjectsDict[self.vlegend].info['TempoVivo']
-           #print "ddddddddddd            abas    ddddddddddddddd"
-#           print self.dataObjectsDict[self.vlegend].info['DataTempo']
            if self.dataObjectsDict[self.vlegend].info['Massa'] <> str(self.ui.txtmassa.text()):
               self.dataObjectsDict[self.vlegend].info['Massa']=str(self.ui.txtmassa.text())
               self.dirty = True
@@ -1117,13 +835,12 @@ class startGui(QtGui.QMainWindow):
            self.dataObjectsDict[self.vlegend].info['Sigma']=str(self.ui.txtsigma.text())
            self.saiuAba = 0
            if calcula:
-        # ao ler um arquivo de espectro individual, tb faz o calculo em background
+# ao ler um arquivo de espectro individual, tb faz o calculo em background
               fc = fazCalculos(self.ui.lstarqs,self.ui.lstarqs.currentRow())
-#        fc = fazCalculos(self.ui.lstarqs)
               self.threads.append(fc)
               fc.start()
-              self.dirty = True
-              self.setWindowModified(self.dirty)
+#              self.dirty = True
+#              self.setWindowModified(self.dirty)
          except:
             msg = qt.QMessageBox(self)
             msg.setIcon(qt.QMessageBox.Critical)
@@ -1135,32 +852,27 @@ class startGui(QtGui.QMainWindow):
 
 # aba - Grafico
         if self.ui.tabWidget.currentIndex() == 0:
-            if (self.projeto == ''):
-              msg = qt.QMessageBox(self)
-              msg.setIcon(qt.QMessageBox.Critical)
-              msg.setText("Nenhum projeto aberto!")
-              msg.exec_()
-              self.ui.tabWidget.setCurrentIndex(4)
-              return
-            legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
-            info,x,y = self.lerlegend(legend)
-            self.graph.clearcurves()
-            curveinfo={}
-            self.graph.newCurve(legend,x,
+            print "num. espectros lista: ", self.ui.lstarqs.count()
+            if self.ui.lstarqs.count() > 0:
+                legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
+#            print legend
+                info,x,y = self.lerlegend(legend)
+#                print "x type", type(x), "  y type",  type(y)
+                self.graph.clearcurves()
+                curveinfo={}
+                self.graph.newCurve(legend,x,
                                     y,
-                                    logfilter=1, curveinfo=curveinfo)
-            self.graph.replot()
-            self.ui.tabWidget.setCurrentIndex(0)
+                                    logfilter=1, curveinfo=None) #curveinfo)
+                self.graph.replot()
+#                self.ui.tabWidget.setCurrentIndex(0)
+            else:
+            # não tem espectro aberto, apaga os gráficos
+                self.graph.clearcurves()
 # aba - Parametros
         elif self.ui.tabWidget.currentIndex() == 1:
-           if (self.projeto == ''):
-              msg = qt.QMessageBox(self)
-              msg.setIcon(qt.QMessageBox.Critical)
-              msg.setText("Nenhum projeto aberto para ser fechado!")
-              msg.exec_()
-              self.ui.tabWidget.setCurrentIndex(4)
-              return
            self.saiuAba = 1
+           if self.ui.lstarqs.count() == 0:
+               return
            legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
            #legend = self.graph.getactivecurve(justlegend = 1)
            if legend is None:
@@ -1177,19 +889,12 @@ class startGui(QtGui.QMainWindow):
            self.ui.lblvivo.setText(str(info['TempoVivo']))
            self.ui.lblmorto.setText(str(info['TempoTotal']))
            aux22=(info['DataTempo'])
-#           print "aux22"
-#           print aux22
            aux=QtCore.QString(aux22)
-#           print aux
-#           print type(aux)
            now2 = QtCore.QDateTime.fromString(aux22, QtCore.QString("dd/MM/yyyy hh:mm:ss"))
-#           print now2
-#           print type(now2)
            self.ui.txtdatah.setDateTime(now2)
            self.ui.txtmassa.setText(str(info['Massa']))
            self.ui.txtnivel.setText(str(info['Nivel']))
            self.ui.txtsigma.setText(str(info['Sigma']))
-#           self.ui.txtdatah.text()self.dataObjectsDict[self.vlegend].info['DataTempo']=("%s" %(self.ui.txtdatah.text()))
 
            if self.dataObjectsDict[legend].info['Amostra']==1:
               self.ui.rba.setChecked(True)
@@ -1198,7 +903,6 @@ class startGui(QtGui.QMainWindow):
               self.ui.rba.setChecked(False)
               self.ui.rbp.setChecked(True)
               if len(self.dataObjectsDict[legend].info['lElem'])==0:
-                 #print "clearclearclearclear"
                  te=self.ui.tbElem.rowCount()
                  self.dataObjectsDict[legend].info['lElem']=''
                  for e in range(0,te):
@@ -1240,36 +944,13 @@ class startGui(QtGui.QMainWindow):
 
 # ------ aba - Resultado de Calculos
         elif self.ui.tabWidget.currentIndex() == 2:
-           #if (self.dataObjectsDict[self.vlegend].info['ArqCalib']  == ''):
-               #msg = qt.QMessageBox(self)
-               #msg.setIcon(qt.QMessageBox.Critical)
-               #msg.setText("Sem arquivo de calibraï¿½ï¿½o, nï¿½o pode calcular!")
-               #if qt.qVersion() < '4.0.0':
-                  #msg.exec_loop()
-               #else:
-                  #msg.exec_()
-               #return
-           if (self.projeto == ''):
-              msg = qt.QMessageBox(self)
-              msg.setIcon(qt.QMessageBox.Critical)
-              msg.setText("Nenhum projeto aberto para ser fechado!")
-              msg.exec_()
-              self.ui.tabWidget.setCurrentIndex(4)
-              return
+           if self.ui.lstarqs.count() == 0:
+               return
            legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
-           #legend = self.graph.getactivecurve(justlegend = 1)
-
            self.montagrade(legend)
-           #self.vispectFit()
+
 # ------ aba - Resultado das Concentracoes
         elif self.ui.tabWidget.currentIndex() == 3:
-           if (self.projeto == ''):
-              msg = qt.QMessageBox(self)
-              msg.setIcon(qt.QMessageBox.Critical)
-              msg.setText("Nenhum projeto aberto!")
-              msg.exec_()
-              self.ui.tabWidget.setCurrentIndex(4)
-              return
            resp,smsg = self.consiste()
            if resp:
                msg = qt.QMessageBox(self)
@@ -1287,7 +968,8 @@ class startGui(QtGui.QMainWindow):
 
     def imprimeResultados(self):
         """ Botao: cmdImpRes - da aba Resultado dos Calculos
-           imprime os resultados dos calculos, energia, BG , etc..."""
+           imprime os resultados dos calculos, energia, BG , etc...
+        """
         if self.printer is None:
            self.printer = qt.QPrinter()
            self.printer.setPageSize(qt.QPrinter.A4)
@@ -1358,7 +1040,8 @@ class startGui(QtGui.QMainWindow):
 
     def printcabecalho(self,pageRect,fm,LeftMargin,sansFont,sansLineHeight):
         """ da rotina: imprimeResultados do Botao: cmdImpRes - da aba Resultado dos Calculos
-            imprime o cabecalho do relatorio energia, BG , etc..."""
+            imprime o cabecalho do relatorio energia, BG , etc...
+        """
         cabec1 = 'Resultados'
         cabec2 = 'Arquivo: '+self.legend
         if self.dataObjectsDict[self.legend].info['Amostra'] == 2:
@@ -1448,76 +1131,37 @@ class startGui(QtGui.QMainWindow):
 
 
     def vispectFit(self,legend=None):
-        """   Vai executar rotina para localizaï¿½ï¿½o dos picos e o cï¿½lculo das energias, area do pico , etc...
-            1. Recupera a legenda do grafico, que ï¿½ o nome do arquivo
-            2. Atravï¿½s da legenda executa rotina lerlegend()  que retona parametros, os canais e conmtagens
-            3. Apï¿½s executa a rotina da classe vispectfit para efetuar a localizaï¿½ï¿½o dos picos e calculos """
-
+        """   Vai executar rotina para localização dos picos e o cálculo das energias, area do pico , etc...
+            1. Recupera a legenda do grafico, que é o nome do arquivo
+            2. Através da legenda executa rotina lerlegend()  que retona parametros, os canais e conmtagens
+            3. Após executa a rotina da classe vispectfit para efetuar a localização dos picos e calculos
+        """
+        """Executa a rotina para a localização dos picos e o cálculo das energias, etc.   """
         if legend == None:
-            legend = self.graph.getactivecurve(justlegend = 1)
-        #print type(legend),legend
-        #legend2 = self.graph.getactivecurve(justlegend = 1)
-        #print type(legend2),legend2
-        vvl=legend
-        if legend is None:
-            msg = qt.QMessageBox(self)
-            msg.setIcon(qt.QMessageBox.Critical)
-            msg.setText("Please Select an active curve")
-            if qt.qVersion() < '4.0.0':
-                msg.exec_loop()
-            else:
-                msg.exec_()
             return
+
+#        legend = self.graph.getactivecurve(justlegend = 1)
+#        vvl=legend
+#        if legend is None:
+#            msg = qt.QMessageBox(self)
+#            msg.setIcon(qt.QMessageBox.Critical)
+#            msg.setText("Please Select an active curve")
+#            if qt.qVersion() < '4.0.0':
+#                msg.exec_loop()
+#            else:
+#                msg.exec_()
+#            return
         info,x,y = self.lerlegend(legend)
-#silvio mostra valores de canais para entendimento
-#        print "ajustennnnnnnnnnnnnnnnnnnnnnnnnnnn"
-#        print legend
-#        print info
-#        print x
-#        print y
-#        file=open("c:testy",'w')
-#        for j in range(0,8000):
-#            file.write("%d;%d\n" %(j,y[j]))
-#        file.close
-#        file=0
-#        self.simplefit.show()
         if info is not None:
             xmin,xmax=self.graph.getx1axislimits()
             self.vispectfit.Lt = info['TempoVivo']
-#            print info['TempoVivo']
-            self.vispectfit.vy=Numeric.array(y,Numeric.Float64)
-##            self.updateStatus("%s" % ("Calculando espectro: " + legend))
+            self.vispectfit.vy=np.array(y,np.float64)
+            self.updateStatus("%s" % ("Calculando espectro: " + legend))
             ppdic={}
             ppdic=self.vispectfit.vispectfit(xmin=xmin,xmax=xmax,vlegend=info).copy()
-#            print legend
-#            print vvl
-#            print "ANTESpdicrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
-#            print pdic
-#            if legend <> 'M2022I3.MCA':
-#               Alegend='M2022I3.MCA'
-#               print self.dataObjectsDict[Alegend].info['ResCalculo'][0]
-#            print "pdicrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
-
             self.dataObjectsDict[legend].info['ResCalculo']=ppdic
             n=len(ppdic)
             self.nlinhas=n
- #           self.ui.tableWidget.clear()
-#            te=self.ui.tableWidget.rowCount()
-#            print "te %d n=%d" % (te,n)
-#            for e in range(0,te):
-#                print "passou %d" % e
-#                self.ui.tableWidget.removeRow(0)
-            #VispectFuncs.criarGrade(self.ui.tableWidget, n,12,{})
-            #VispectFuncs.cabecGradeRes(self.ui.tableWidget)
-            #for i in range(0,n):
-               #VispectFuncs.incGrade(self.ui.tableWidget,i,ppdic[i])
-            #self.ui.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-#            legend='M2022I3.MCA'
- #           print self.dataObjectsDict[legend].info['ResCalculo'][0]
-#            legend='OT031I3.MCA'
-#            print self.dataObjectsDict[legend].info['ResCalculo'][0]
-#            print self.dataObjectsDict
-
             return
         else:
             msg = qt.QMessageBox(self)
@@ -1569,11 +1213,11 @@ class startGui(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.tabWidget,QtCore.SIGNAL("currentChanged(int)"),self.verificaAbas)
         QtCore.QObject.connect(self.cmdimpgraf, QtCore.SIGNAL("clicked()"), self.imprimeGrafico)
 # posiciona aba
-        self.ui.tabWidget.setCurrentIndex(4)
+#        self.ui.tabWidget.setCurrentIndex(4)
 
 
     def lerlegend(self,legend,full=0):
-# Recupera do dicionario dataObjectsDict, atravï¿½s da legenda os dados do espectro e retorna os valores
+# Recupera do dicionario dataObjectsDict, atraves da legenda os dados do espectro e retorna os valores
         info = None
         xdata    = None
         ydata    = None
@@ -1592,43 +1236,14 @@ class startGui(QtGui.QMainWindow):
 
 
     def vispectLer(self):
-# Efetua a leitura do arquivo de espectro e apresenta o grafico na tela
-# 1. Abre janela para localizar o arquivo
-# 2. Executa a rotina ler_MCAeCHN, passando como parametro o arquivo
-# 3. Recebe os dados do arquivo em um DataObject
-# 4. Guarda os dados em um dicionario dataObjectsDict, com o nome do arquivo
-# 5. Exibe grafico no video do arquivo que foi aberto
-#        filetypes = ""
-#        wdir = ":"
-#        lastFileFilter = "*.MCA ; *.CHN"
+        """ Efetua a leitura do arquivo de espectro e apresenta o grafico na tela
+             1. Abre janela para localizar o arquivo
+             2. Executa a rotina ler_MCAeCHN, passando como parametro o arquivo
+             3. Recebe os dados do arquivo em um DataObject
+             4. Guarda os dados em um dicionario dataObjectsDict, com o nome do arquivo
+             5. Exibe grafico no video do arquivo que foi aberto
+        """
 
-#        filelist = qt.QFileDialog.getOpenFileNames(self,
-#                            "Abrir Arquivo",          wdir,
-#                             filetypes,
-#                            lastFileFilter)
-#        filelist.sort()
-#        filename=[]
-#        for f in filelist:
-#            filename.append(str(f))
-#        if not len(filename):    return
-#        if len(filename):
-#            lastInputDir  = os.path.dirname(filename[0])
-#            justloaded = True
-#        if justloaded:
-#            if type(filename) != type([]):
-#                filename = [filename]
-#        if not os.path.exists(filename[0]):
-#            raise "IOError",("Arquivo nï¿½o existe %s " % filename[0])
-#        n=string.rfind(filename[0],'/')
-#        legend=filename[0][n+1:]
-#        print "self.projeto['ArqCalib']"
-#        print self.pprojeto
-        if self.pprojeto['ArqCalib'] == '':
-           msg = qt.QMessageBox(self)
-           msg.setIcon(qt.QMessageBox.Critical)
-           msg.setText(u"Sem arquivo de calibração, não pode calcular!")
-           msg.exec_()
-           return
         cwd = os.getcwd()
         openfile = qt.QFileDialog(self)
         openfile.setFilter('*.MCA ; *.CHN')
@@ -1665,16 +1280,17 @@ class startGui(QtGui.QMainWindow):
         vobj = crtLerEspectro.LerVispect(vfile)
         vdata = vobj.ler_MCAeCHN()
 #        print "info = ",vdata.info
-#        print "datay = ",vdata.y
-#        print "datax = ",vdata.x
+#        print "datay = ",vdata.y[0],  "type(datay)",  type(vdata.y[0])
+  #      print "datax = ",vdata.x[0],  "type(datax)",  type(vdata.x[0])
         dataObject = vdata
         self.dataObjectsDict[legend] = dataObject
-# por enquanto estou atribuindo os valores de calibraï¿½ï¿½o a todos os espectros, mais uma unica vez o usuario entra com o arquivo-(rotina lercalibracao).
-        self.dataObjectsDict[legend].info['slope'] = self.pprojeto['slope']
-        self.dataObjectsDict[legend].info['offset']= self.pprojeto['offset']
-        self.dataObjectsDict[legend].info['ro']    = self.pprojeto['ro']
-        self.dataObjectsDict[legend].info['kres']  = self.pprojeto['kres']
-        self.dataObjectsDict[legend].info['ArqCalib']  = self.pprojeto['ArqCalib']
+# por enquanto estou atribuindo os valores de calibracao a todos os espectros,
+        self.dataObjectsDict[legend].info['slope'] = 1.0
+        self.dataObjectsDict[legend].info['offset']= 0.0
+        self.dataObjectsDict[legend].info['ro']    = 1.0
+        self.dataObjectsDict[legend].info['kres']  = 1.0
+        self.dataObjectsDict[legend].info['ArqCalib']  = ' '
+        self.dataObjectsDict[legend].info['FakeCal']=True
 
         self.vaux=legend
         self.vlegend=legend
@@ -1684,7 +1300,7 @@ class startGui(QtGui.QMainWindow):
         self.graph.clearcurves()
         self.graph.newCurve(legend,x=vdata.x[0],
                                    y=vdata.y[0],
-                                   logfilter=1, curveinfo=curveinfo)
+                                   logfilter=1, curveinfo=None) #curveinfo)
 
         #self.graph.setxofy(legend)
         self.graph.replot()
@@ -1698,8 +1314,8 @@ class startGui(QtGui.QMainWindow):
 #        fc = fazCalculos(self.ui.lstarqs)
         self.threads.append(fc)
         fc.start()
-        self.dirty = True
-        self.setWindowModified(self.dirty)
+#        self.dirty = True
+#        self.setWindowModified(self.dirty)
 
     def montagrade(self,legend):
         """rotina para montar a tabela com o resultado dos calculos (busca de picos e energias)
@@ -1710,7 +1326,13 @@ class startGui(QtGui.QMainWindow):
 #            print type(t)
         ppdic={}
         ppdic=self.dataObjectsDict[legend].info['ResCalculo']
-        n=len(ppdic)
+        try:
+            n=len(ppdic)
+        except:
+            crtFuncoes.criarGrade(self.ui.tableWidget, 1, 12, {})
+            crtFuncoes.cabecGradeRes(self.ui.tableWidget)
+            crtFuncoes.incGrade(self.ui.tabWidget, 0, "Sem Resultados")
+            return
         if n > 0:
             self.nlinhas=n
             crtFuncoes.criarGrade(self.ui.tableWidget, n,12,{})
@@ -1733,16 +1355,17 @@ class startGui(QtGui.QMainWindow):
 #class fazCalculos(QtCore.QThread):
 class fazCalculos(threading.Thread):
        """Classe utilizada para realizar os calculos dos espectros em background
-          Recebe uma lista de nomes de arquivos de espectro para calculara"""
+          Recebe um nome de arquivo de espectro para calcular"""
 #       sem = QtCore.QSemaphore(1)
 
 #       def __init__(self,listaarqs, parent=None):
 #           super(fazCalculos,self).__init__(parent)
-       def __init__(self,listaarqs,posicao=0):
+       def __init__(self, listaarqs,posicao=0):
            threading.Thread.__init__(self)
 
            self.listaarqs = listaarqs
            self.posicao   = posicao
+
 #           fazCalculos.sem.acquire(1)
 
 
@@ -1762,7 +1385,7 @@ class fazCalculos(threading.Thread):
 
 #               self.listaarqs.setCurrentRow(i)
 #           fazCalculos.sem.release(1)
-#           appStart.updateStatus("Calculos Finalizados.")
+           appStart.updateStatus("Calculos Finalizados.")
 
 
 
