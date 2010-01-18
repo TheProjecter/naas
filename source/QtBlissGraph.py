@@ -31,34 +31,28 @@
 import copy
 import sys
 import string
-
-
-import PyQt4.Qt as qt
-from PyQt4 import Qwt5 as qwt
-
-
-#if 'qt' not in sys.modules:
-    #try:
-        #import PyQt4.Qt as qt
-        #from PyQt4 import Qwt5 as qwt
-    #except:
-        #import qt
-        #try:
-            #import Qwt5 as qwt
-        #except:
-            #try:
-                #import Qwt4 as qwt 
-            #except:
-                #import qwt
-#else:
-    #import qt
-    #try:
-        #import Qwt5 as qwt
-    #except:
-        #try:
-            #import Qwt4 as qwt 
-        #except:
-            #import qwt
+if 'qt' not in sys.modules:
+    try:
+        import PyQt4.Qt as qt
+        from PyQt4 import Qwt5 as qwt
+    except:
+        import qt
+        try:
+            import Qwt5 as qwt
+        except:
+            try:
+                import Qwt4 as qwt 
+            except:
+                import qwt
+else:
+    import qt
+    try:
+        import Qwt5 as qwt
+    except:
+        try:
+            import Qwt4 as qwt 
+        except:
+            import qwt
 
 QTVERSION = qt.qVersion()
     
@@ -75,7 +69,7 @@ try:
 except:
     pass
 import time
-from Numeric import *
+import numpy as np
 DEBUG = 0
 USE_SPS_LUT = 1
 if USE_SPS_LUT:
@@ -108,16 +102,16 @@ elif QTVERSION > '4.0.0':
 if not USE_SPS_LUT:
     # from scipy.pilutil
     def bytescale(data, cmin=None, cmax=None, high=255, low=0):
-        if data.typecode == UInt8:
+        if isinstance(data, np.uint8): 
             return data
         high = high - low
         if cmin is None:
-            cmin = min(ravel(data))
+            cmin = np.amin(np.ravel(data))
         if cmax is None:
-            cmax = max(ravel(data))
+            cmax = np.amax(np.ravel(data))
         scale = high *1.0 / (cmax-cmin or 1)
-        bytedata = ((data*1.0-cmin)*scale + 0.4999).astype(UInt8)
-        return bytedata + asarray(low).astype(UInt8)
+        bytedata = ((data*1.0-cmin)*scale + 0.4999).astype(np.uint8)
+        return bytedata + np.asarray(low).astype(np.uint8)
 
     def fuzzypalette():
         #calculare bit mapdef
@@ -212,20 +206,20 @@ class QtBlissGraphWindow(qt.QMainWindow):
             self.resize(400,300)
 
     def initIcons(self):
-        self.normalIcon	= qt.QIconSet(qt.QPixmap(IconDict["normal"]))
-        self.zoomIcon	= qt.QIconSet(qt.QPixmap(IconDict["zoom"]))
-        self.roiIcon	= qt.QIconSet(qt.QPixmap(IconDict["roi"]))
-        self.peakIcon	= qt.QIconSet(qt.QPixmap(IconDict["peak"]))
+        self.normalIcon = qt.QIconSet(qt.QPixmap(IconDict["normal"]))
+        self.zoomIcon   = qt.QIconSet(qt.QPixmap(IconDict["zoom"]))
+        self.roiIcon    = qt.QIconSet(qt.QPixmap(IconDict["roi"]))
+        self.peakIcon   = qt.QIconSet(qt.QPixmap(IconDict["peak"]))
 
-        self.zoomResetIcon	= qt.QIconSet(qt.QPixmap(IconDict["zoomreset"]))
-        self.roiResetIcon	= qt.QIconSet(qt.QPixmap(IconDict["roireset"]))
-        self.peakResetIcon	= qt.QIconSet(qt.QPixmap(IconDict["peakreset"]))
-        self.refreshIcon	= qt.QIconSet(qt.QPixmap(IconDict["reload"]))
+        self.zoomResetIcon  = qt.QIconSet(qt.QPixmap(IconDict["zoomreset"]))
+        self.roiResetIcon   = qt.QIconSet(qt.QPixmap(IconDict["roireset"]))
+        self.peakResetIcon  = qt.QIconSet(qt.QPixmap(IconDict["peakreset"]))
+        self.refreshIcon    = qt.QIconSet(qt.QPixmap(IconDict["reload"]))
 
-        self.logxIcon	= qt.QIconSet(qt.QPixmap(IconDict["logx"]))
-        self.logyIcon	= qt.QIconSet(qt.QPixmap(IconDict["logy"]))
-        self.fitIcon	= qt.QIconSet(qt.QPixmap(IconDict["fit"]))
-        self.searchIcon	= qt.QIconSet(qt.QPixmap(IconDict["peaksearch"]))
+        self.logxIcon   = qt.QIconSet(qt.QPixmap(IconDict["logx"]))
+        self.logyIcon   = qt.QIconSet(qt.QPixmap(IconDict["logy"]))
+        self.fitIcon    = qt.QIconSet(qt.QPixmap(IconDict["fit"]))
+        self.searchIcon = qt.QIconSet(qt.QPixmap(IconDict["peaksearch"]))
 
     def initToolBar(self):
         toolbar= qt.QToolBar(self, "Graph Commands")
@@ -1670,17 +1664,20 @@ class QtBlissGraph(qwt.QwtPlot):
             self.curves[key]['curveinfo'] = copy.deepcopy(curveinfo)
         if y is not None:
             if len(y):
-                if type(y) == ArrayType:
+                if isinstance(y, np.ndarray): 
                     if y.shape == (len(y), 1):
-                       y.shape =  [len(y),] 
+                        y = y.reshape([len(y), ])
                 if x is None:
-                    x=arange(len(y))
+                    x=np.arange(len(y))
                 if logfilter:
-                    i1=nonzero(y>0.0)
-                    x= take(x,i1)
-                    y= take(y,i1)
+                    i1=np.flatnonzero(y>0.0)
+                    x = x.take(i1)
+                    y = y.take(i1)
             if len(y):
-                ymin = min(y)
+                if isinstance(y, np.ndarray):
+                    ymin = np.amin(y)
+                else:
+                    ymin = min(y)
             else:
                 self.delcurve(key)
                 return
@@ -1689,9 +1686,10 @@ class QtBlissGraph(qwt.QwtPlot):
                 #    return                    
             self.setCurveData(self.curves[key]['curve'], x, y)
             if kw.has_key('baseline'):
-                ybase = take(kw['baseline'],i1)
+                #ybase = take(kw['baseline'],i1)
+                ybase = kw['baseline'].take(i1)
                 if logfilter:
-                    i1 = nonzero(ybase<=0)
+                    i1 = np.nonzero(ybase<=0)
                     for i in i1:
                         ybase[i] = ymin
                 if QWTVERSION4:
@@ -1705,8 +1703,9 @@ class QtBlissGraph(qwt.QwtPlot):
                 for region in kw['regions']:
                     #print region[0]
                     #print region[1]
-                    i1 = min(nonzero(x>=region[0]),0)
-                    i2 = max(nonzero(x<=region[1]))
+                    #print "type(region[0])",   type(region[0])
+                    i1 = min(np.nonzero(x>=region[0]),0)
+                    i2 = max(np.nonzero(x<=region[1]))
                     #print "i1,i2 ",i1,i2
                     #print len(x)
                     regions.append([int(i1),int(i2)])
@@ -1909,7 +1908,7 @@ class QtBlissGraph(qwt.QwtPlot):
                     y.append(self.curve(index).y(i))
             else:
                 print "QtBlissGraph: get curve data to be implemented"
-            return legend,array(x).astype(Float),array(y).astype(Float)
+            return legend,np.array(x).astype(np.float),np.array(y).astype(np.float)
         else:
             return None,None,None
 
@@ -2931,9 +2930,9 @@ def make0():
     nplots=10
     for i in range(nplots):
         # calculate 3 NumPy arrays
-        x = arrayrange(0.0, 10.0, 0.1)
-        y = 10*sin(x+(i/10.0) * 3.14)
-        z = cos(x+(i/10.0) * 3.14)
+        x = np.arange(0.0, 10.0, 0.1)
+        y = 10*np.sin(x+(i/10.0) * 3.14)
+        z = np.cos(x+(i/10.0) * 3.14)
         #build a key
         a=`i`
         #plot the data
@@ -2943,7 +2942,7 @@ def make0():
     mY = demo.graph.inserty1marker(0.0, 0.0, 'y = 0')
     demo.graph.setmarkerfollowmouse(mY,True)
     # insert a vertical marker at x = 2 pi
-    mX = demo.graph.insertx1marker(2*pi, 0.0, label='x = 2 pi')
+    mX = demo.graph.insertx1marker(2*np.pi, 0.0, label='x = 2 pi')
     demo.graph.setmarkerfollowmouse(mX,True)
     demo.graph.enablemarkermode()
     demo.graph.canvas().setMouseTracking(True)
@@ -2966,8 +2965,8 @@ def make0():
             print demo.graph.curve(1).x(i)
     
     demo.graph.replot()
-    idata = arange(10000.)
-    idata.shape = [100,100]
+    idata = np.arange(10000.)
+    idata = idata.reshape([100, 100])
     demo.graph.imagePlot(idata)
     demo.graph.replot()
     demo.graph.setactivecurve('y = sin(x)3')
