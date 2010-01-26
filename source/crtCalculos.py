@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import Numeric
+#import numpy as np
 import crtConcentracao
 import Elementos
-import QtBlissGraph
-qt = QtBlissGraph.qt
+#import QtBlissGraph
+#qt = QtBlissGraph.qt
 import os
 import sys, string
 
@@ -13,7 +14,7 @@ class VispectFit:
     def __init__(self):
         self.dataObjectsDict = {}
         self.Isommet=Numeric.zeros([200], Numeric.Int)
-        self.VisTable = crtConcentracao.startGui()
+#        self.VisTable = crtConcentracao.startGui()
         self.Vispectdic={}
         self.vinfo={}
         #self.Elementos=Elementos.Elementos('elementos')
@@ -48,37 +49,36 @@ class VispectFit:
 
 
     def vispectfit(self,xmin,xmax,vlegend):
-        """this is the main function for searching peaks and calculating 
+        """this is the main function for searching peaks and calculating
         area and bg;
         it receives the first and final channel and the name of the
         spectrum file.
         """
         self.Vispectdic={}
         self.vinfo = vlegend
+#        print type(vlegend)
 # recupera dados de calibracao
-        self.FakeCal = False
         self.slope=self.vinfo['slope']
         self.offset=self.vinfo['offset']
+        self.enerquad = self.vinfo['enerquad']
         self.ro=self.vinfo['ro']
         self.kres=self.vinfo['kres']
-        if len(self.vinfo['ArqCalib']) == 0:
-            self.FakeCal = True
+        self.widthquad = self.vinfo['widthquad']
         nivel=int(self.vinfo['Nivel'])
         barre=int(self.vinfo['Nivel'])
         self.sig = int(self.vinfo['Sigma'])
-
         #self.ifin=xmax-600
         #if self.ifin > 8100:
-        self.ifin = 8191
+        self.ifin = len(self.vy) - 1
+#        self.ifin = 8191
         vfim=int(self.ifin)
         self.ideb=0
         sauveideb=self.ideb
         self.ideb=40
         oldfi=0
-
         for j in range(self.ideb,vfim):
-            self.vy[j] = self.fcanal(j,4,0)
-            self.vy[j] = self.fcanal(j,4,1)
+            self.vy[j] = self.fncanal(j,4,0)
+            self.vy[j] = self.fncanal(j,4,1)
         rescorrel = self.ro*(1+self.kres*Numeric.sqrt(float(self.ideb+self.ifin)/2*self.slope+self.offset))
         nccorrel = int(round(float(rescorrel)/self.slope)) - 2
         if nccorrel <= 0:
@@ -89,12 +89,12 @@ class VispectFit:
         self.f1zfin = 0
 
         for j in range(i,i+nccorrel):
-            contenucentre = contenucentre+Numeric.sqrt(self.fcanal(j,2,0))
+            contenucentre = contenucentre+Numeric.sqrt(self.fncanal(j,2,0))
 
         contenuailes = 0.0
 
         for j in range(self.ideb,self.ideb+(nccorrel*5)):
-            contenuailes = contenuailes + Numeric.sqrt(self.fcanal(j,2,0))
+            contenuailes = contenuailes + Numeric.sqrt(self.fncanal(j,2,0))
         somcorrel = 0
         ipic = 0
         oldcanalcorrel = 0
@@ -102,10 +102,11 @@ class VispectFit:
         rescorrel = self.ro*(1+self.kres*Numeric.sqrt(float(self.ideb+self.ifin)/2*self.slope+self.offset))
         nccorrel = int(round(float(rescorrel)/self.slope)) - 2
         canalcorrel=0
-        for j in range(i,int(self.ifin - nccorrel*3)+1):
+#        for j in range(i,int(self.ifin - nccorrel*3)+1):
+        for j in range(i,int(self.ifin - nccorrel*3)):
             kcan = kcan +1
-            contenuailes = contenuailes - Numeric.sqrt((self.fcanal(j-nccorrel*2,2,0))) + Numeric.sqrt((self.fcanal(j+nccorrel*3,2,0)))
-            contenucentre = contenucentre - Numeric.sqrt((self.fcanal(j,2,0))) + Numeric.sqrt((self.fcanal(j+nccorrel,2,0)))
+            contenuailes = contenuailes - Numeric.sqrt((self.fncanal(j-nccorrel*2,2,0))) + Numeric.sqrt((self.fncanal(j+nccorrel*3,2,0)))
+            contenucentre = contenucentre - Numeric.sqrt((self.fncanal(j,2,0))) + Numeric.sqrt((self.fncanal(j+nccorrel,2,0)))
             canalcorrel = contenucentre*5-contenuailes
             if canalcorrel > barre and self.f1zdeb == 0:
                 self.fnzondeb(kcan,nccorrel)
@@ -113,26 +114,26 @@ class VispectFit:
                 somcorrel = somcorrel + canalcorrel
 #silvio ver comparacao de interiro e float
             if (self.f1zdeb == 1) and (canalcorrel > oldcanalcorrel) :
-                self.vy[kcan-1] = self.fcanal(kcan-1,4,1)
-                self.vy[kcan] = self.fcanal(kcan,3,1)
+                self.vy[kcan-1] = self.fncanal(kcan-1,4,1)
+                self.vy[kcan] = self.fncanal(kcan,3,1)
             if canalcorrel < barre and self.f1zfin == 0 and self.f1zdeb == 1:
                 self.fnzonfin(kcan,nccorrel)
             if self.f1zdeb == 1 and self.f1zfin == 1 :
                 for il in range(self.Id,self.Fi+1):
-                    if (int(self.fcanal(il,1,1)) & 2) == 2 :
+                    if (int(self.fncanal(il,1,1)) & 2) == 2 :
                         ksommet = il+1
                         break
-                ener = ksommet*self.slope + self.offset
+                ener = self.Energy(ksommet)
                 lmh = float(self.ro*(1 + self.kres*Numeric.sqrt(ener)))/self.slope
                 if self.Id < oldfi:
                     self.Id = oldfi + 1
                 if (ksommet - self.Id + 1) > int(round(3*lmh)):
                     self.Id = ksommet - int(round(2*lmh))
                 for il in range(self.Fi,self.Id-1,-1):
-                    if (int(self.fcanal(il,1,1)) & 2) == 2 :
+                    if (int(self.fncanal(il,1,1)) & 2) == 2 :
                         ksommet = il+1
                         break
-                ener=ksommet*self.slope+self.offset
+                ener = self.Energy(ksommet)
                 lmh = float(self.ro*(1 + self.kres*Numeric.sqrt(ener)))/self.slope
                 if (self.Fi - ksommet + 1) > int(round(3*lmh)):
                     self.Fi = ksommet + int(round(2*lmh))
@@ -141,9 +142,9 @@ class VispectFit:
                     som = 0.0
                     ipic = ipic + 1
                     for il in range(self.Id,self.Fi+1):
-                        self.vy[il] = self.fcanal(il,3,0)
-                        somcan = somcan + Numeric.sqrt(self.fcanal(il,2,0))
-                        som = som + self.fcanal(il,2,0)
+                        self.vy[il] = self.fncanal(il,3,0)
+                        somcan = somcan + Numeric.sqrt(self.fncanal(il,2,0))
+                        som = som + self.fncanal(il,2,0)
                     oldfi = self.Fi
                     somcan = somcan - (float(Numeric.sqrt(self.moyamont+self.moyaval))/2)*(self.Fi-self.Id+1)
                     rapport = float(somcan)/somcorrel
@@ -153,11 +154,11 @@ class VispectFit:
                         sy =float(200*Numeric.sqrt(somnette + 2*trapeze))/somnette
                         if sy < 0 or sy > 100 or rapport > 5 or ipic == 1  :
                             for il in range(self.Id,self.Fi+1):
-                                self.vy[il] = self.fcanal(il,4,0)
-                                self.vy[il] = self.fcanal(il,4,1)
+                                self.vy[il] = self.fncanal(il,4,0)
+                                self.vy[il] = self.fncanal(il,4,1)
                 else:
                     for il in range(self.Id,self.Fi+1):
-                        self.vy[il] = self.fcanal(il,4,1)
+                        self.vy[il] = self.fncanal(il,4,1)
                 self.f1zdeb = 0
                 self.f1zfin = 0
                 somcorrel = 0.0
@@ -170,7 +171,7 @@ class VispectFit:
 #monta loop iniciando de ideb=40 + nccorrel=5*2 = 10
         syg=0
         for j in range(int(self.ideb + nccorrel*2),int(self.ifin - nccorrel*2)+1):
-            vtes=int(self.fcanal(j,1,0))
+            vtes=int(self.fncanal(j,1,0))
             if (((vtes & 1)  == 1) and self.f1zdeb == 0):
                 self.f1zdeb = 1
                 self.Id = j
@@ -180,22 +181,22 @@ class VispectFit:
                 self.Fi = j-1
             if self.f1zdeb == 1 and self.f1zfin == 1 :
                 for kcan in range(self.Id,self.Fi+1):
-                    if (int(self.fcanal(kcan,1,1)) & 2) == 2 :
-                        if self.fcanal(kcan,2,0) < self.fcanal(kcan-1,2,0) :
-                            self.vy[kcan] = self.fcanal(kcan,4,1)
-                            self.vy[kcan-1] = self.fcanal(kcan-1,3,1)
-                        elif self.fcanal(kcan,2,0) < self.fcanal(kcan+1,2,0):
-                            self.vy[kcan] = self.fcanal(kcan,4,1)
-                            self.vy[kcan+1] = self.fcanal(kcan+1,3,1)
+                    if (int(self.fncanal(kcan,1,1)) & 2) == 2 :
+                        if self.fncanal(kcan,2,0) < self.fncanal(kcan-1,2,0) :
+                            self.vy[kcan] = self.fncanal(kcan,4,1)
+                            self.vy[kcan-1] = self.fncanal(kcan-1,3,1)
+                        elif self.fncanal(kcan,2,0) < self.fncanal(kcan+1,2,0):
+                            self.vy[kcan] = self.fncanal(kcan,4,1)
+                            self.vy[kcan+1] = self.fncanal(kcan+1,3,1)
                 som = 0
                 ncanaux = 0
                 kmax = self.Id
                 for il in range(self.Id,(self.Id - nccorrel*2)-1,-1):
                     ncanaux=ncanaux+1
-                    som = som + self.fcanal(il,2,0)
-                    if self.fcanal(il,2,0) > self.fcanal(kmax,2,0):
+                    som = som + self.fncanal(il,2,0)
+                    if self.fncanal(il,2,0) > self.fncanal(kmax,2,0):
                         kmax = il
-                somnette = som - (self.fcanal(self.Id,2,0) + self.fcanal(il-1,2,0))*float(ncanaux)/2
+                somnette = som - (self.fncanal(self.Id,2,0) + self.fncanal(il-1,2,0))*float(ncanaux)/2
                 if somnette <> 0.0:
                     syg = float(200*Numeric.sqrt(somnette + 2*(som-somnette)))/somnette
                 if syg > 0.0 and syg < 50.0 :
@@ -203,17 +204,17 @@ class VispectFit:
                     oldid = self.Id
                     self.fnzondeb(kcan,nccorrel)
                     for i in range(self.Id,oldid+1):
-                        self.vy[i] = self.fcanal(i,3,0)
-                    self.vy[kmax] = self.fcanal(kmax,3,1)
+                        self.vy[i] = self.fncanal(i,3,0)
+                    self.vy[kmax] = self.fncanal(kmax,3,1)
                 som = 0
                 ncanaux = 0
                 kmax = self.Fi
                 for i1 in range(self.Fi,(self.Fi + nccorrel*2)+1):
                     ncanaux=ncanaux+1
-                    som = som + self.fcanal(i1,2,0)
-                    if self.fcanal(i1,2,0) > self.fcanal(kmax,2,0):
+                    som = som + self.fncanal(i1,2,0)
+                    if self.fncanal(i1,2,0) > self.fncanal(kmax,2,0):
                         kmax = i1
-                somnette = som - (self.fcanal(self.Fi,2,0) + self.fcanal(i1,2,0))*float(ncanaux)/2
+                somnette = som - (self.fncanal(self.Fi,2,0) + self.fncanal(i1,2,0))*float(ncanaux)/2
                 if somnette <> 0.0:
                     syg = float(200*Numeric.sqrt(somnette + 2*(som-somnette)))/somnette
                 if syg > 0.0 and syg < 50.0 :
@@ -221,14 +222,45 @@ class VispectFit:
                     oldfi = self.Fi
                     self.fnzonfin(kcan,nccorrel)
                     for i in range(oldfi,self.Fi+1):
-                        self.vy[i] = self.fcanal(i,3,0)
-                    self.vy[kmax] = self.fcanal(kmax,3,1)
+                        self.vy[i] = self.fncanal(i,3,0)
+                    self.vy[kmax] = self.fncanal(kmax,3,1)
                 self.f1zdeb = 0
                 self.f1zfin = 0
         self.ideb=sauveideb
         self.ImpZonesPic()
-        return self.Vispectdic
+        return self.Vispectdic.copy()
 
+    def Energy(self,no_can):
+        """ returns channel energy based on calibration data """
+        """ this is a quadratic function as describe in Practical Spectroscopy - Gilmore, pg 146
+        E(keV) = I(keV) + G * C(channels) + Q * C^2
+        where Q is the quadratic factor;
+              G is the gradient (slope)
+              I is the intercept (offset)
+        """
+
+        Coef_A_Cal_Ener = self.vinfo['enerquad']
+        Coef_B_Cal_Ener = self.vinfo['slope']
+        Coef_C_Cal_Ener = self.vinfo['offset']
+
+        energy = no_can * (no_can * Coef_A_Cal_Ener + Coef_B_Cal_Ener) + Coef_C_Cal_Ener
+
+        return energy
+
+    def Resolution(self, ener):
+        """ determination of the resolution for a given energy """
+
+        Ro = self.vinfo['ro']
+        K_Res = self.vinfo['kres']
+        try:
+            Widthquad = self.vinfo['widthquad']
+        except:
+            Widthquad = 0.0
+
+        if ener < 513.0 and ener > 509.0:
+            ener = ener * 1.8
+        resolution = Ro + K_Res * ener + Widthquad * ener * ener
+        return resolution
 
 # localiza inicio da zona
     def fnzondeb(self,kcan,nccorrel):
@@ -236,10 +268,10 @@ class VispectFit:
             self.Id = i1 - 1
             if i1 < 3 :
                 return 0
-            co = self.fcanal((i1-1),2,0) + self.fcanal((i1-2),2,0)
-            if ((self.fcanal(i1,2,0)+co) <= (self.fcanal(i1-3,2,0)+co)) :
+            co = self.fncanal((i1-1),2,0) + self.fncanal((i1-2),2,0)
+            if ((self.fncanal(i1,2,0)+co) <= (self.fncanal(i1-3,2,0)+co)) :
                 break
-        self.moyamont = float(self.fcanal(i1,2,0)+co)/3
+        self.moyamont = float(self.fncanal(i1,2,0)+co)/3
         self.f1zdeb = 1
         return 1
 
@@ -247,14 +279,14 @@ class VispectFit:
     def fnzonfin(self,kcan,nccorrel):
         for il in range(kcan,(kcan+nccorrel*2)+1):
             self.Fi = il + 1
-            co = self.fcanal(il+1,2,0) + self.fcanal(il+2,2,0)
-            if ((self.fcanal(il,2,0)+co) <= (self.fcanal(il+3,2,0)+co)) :
+            co = self.fncanal(il+1,2,0) + self.fncanal(il+2,2,0)
+            if ((self.fncanal(il,2,0)+co) <= (self.fncanal(il+3,2,0)+co)) :
                 break
-        self.moyaval = (float(self.fcanal(il,2,0)+co)/3)
+        self.moyaval = (float(self.fncanal(il,2,0)+co)/3)
         self.f1zfin = 1
         return 1
 
-    def fcanal(self,i,nfoco,acao):
+    def fncanal(self,i,nfoco,acao):
         """Esta função tem 4 ações dependendo de nfoco:
            1 - para obter o byte forte de um canal
            2 - remove o byte forte (usado como marcação) e obtem o valor puro (conteúdo original) do canal.
@@ -270,19 +302,19 @@ class VispectFit:
            return self.vy[i] - long(octetfort)*decal
         if nfoco == 3:
            octetfort = octetfort | int(2**acao)
-           return self.fcanal(i,2,0) + long(octetfort)*decal
+           return self.fncanal(i,2,0) + long(octetfort)*decal
         if nfoco == 4:
            octetfort = octetfort & ~(int(2**acao))
-           return self.fcanal(i,2,0) + long(octetfort)*decal
+           return self.fncanal(i,2,0) + long(octetfort)*decal
 
 
 
     def FNcanexact(self,Fm,Ind):
         """ Function to determine the exact peak channel
-        Determine the channel that divides the peak area at 
+        Determine the channel that divides the peak area at
         half (given by Fm parameter).
-        It seems that there's a problem with this function: 
-        the background is subtracted channel by channel (the 
+        It seems that there's a problem with this function:
+        the background is subtracted channel by channel (the
         counting in the channel bellow the BG line.
         If the BG has a different form (poly ou step function),
         it seems not to take in account.
@@ -291,8 +323,8 @@ class VispectFit:
         I = Ind - 1
         while vAq < self.Area*Fm:
             I = I + 1
-            vAq = vAq + self.fcanal(I,2,0) - (self.A1*I+self.B1)
-        vAp = vAq - ( self.fcanal(I,2,0) - (self.A1*I+self.B1))
+            vAq = vAq + self.fncanal(I,2,0) - (self.A1*I+self.B1)
+        vAp = vAq - ( self.fncanal(I,2,0) - (self.A1*I+self.B1))
         return ((I-1) + float(self.Area*Fm - vAp)/(vAq - vAp) + 0.5)
 
 # verifica regioes e calcula area
@@ -306,14 +338,21 @@ class VispectFit:
         self.NoPic = 0
         self.Id=0
         self.ideb=0
-        for Il in range(self.ideb,self.ifin+1):
-            vres=int(self.fcanal(Il,1,0))
+#        for Il in range(self.ideb,self.ifin+1):
+        for Il in range(self.ideb,self.ifin):
+            vres=int(self.fncanal(Il,1,0))
             if (vres & 1) == 0:
                 if Flag <> 0 :
                     self.Fi = Il-1
-                    self.Y1 = float(self.fcanal((self.Id-1),2,0) + self.fcanal(self.Id,2,0) + self.fcanal((self.Id+1),2,0))/3
-                    self.Y2 = float(self.fcanal((self.Fi-1),2,0) + self.fcanal(self.Fi,2,0) + self.fcanal((self.Fi+1),2,0))/3
-                    self.A1 = float(self.Y1-self.Y2)/(self.Id-self.Fi)
+                    self.Y1 = float(self.fncanal((self.Id-1),2,0) + self.fncanal(self.Id,2,0) + self.fncanal((self.Id+1),2,0))/3
+                    self.Y2 = float(self.fncanal((self.Fi-1),2,0) + self.fncanal(self.Fi,2,0) + self.fncanal((self.Fi+1),2,0))/3
+                    # por algum motivo quando o Nivel de Sensibilidade eh muito baixo, esta dando erro neste pedaco
+                    # self.Id - self.Fi = 0 
+                    # coloquei o try para eliminar este problema, mas nao sei se esta correto.
+                    try:
+                        self.A1 = float(self.Y1-self.Y2)/(self.Id-self.Fi)
+                    except ZeroDivisionError:
+                        pass
                     self.B1 = self.Y1 - self.A1*self.Id
                     oldfi = self.Fi
                     if NbSommets <= 1 :
@@ -323,11 +362,11 @@ class VispectFit:
                         for K in range(1,int(NbSommets-1)+1):
                             ContVallee = 2**24
                             for J in range(self.Isommet[K],self.Isommet[K+1]+1):
-                                if self.fcanal(J,2,0) < ContVallee :
-                                    ContVallee = self.fcanal(J,2,0)
+                                if self.fncanal(J,2,0) < ContVallee :
+                                    ContVallee = self.fncanal(J,2,0)
                                     Ivallee = J
                             Ecart = ContVallee-(Ivallee*self.A1+self.B1)
-                            if (Ecart < Numeric.sqrt(self.fcanal(self.Isommet[K],2,0))) and (Ecart < Numeric.sqrt(self.fcanal(self.Isommet[K+1],2,0))):
+                            if (Ecart < Numeric.sqrt(self.fncanal(self.Isommet[K],2,0))) and (Ecart < Numeric.sqrt(self.fncanal(self.Isommet[K+1],2,0))):
                                 self.Y1 = float(self.Id*self.A1+self.B1)
                                 self.Y2 = float(ContVallee)
                                 if ContVallee-(Ivallee*self.A1+self.B1) < 0 :
@@ -360,25 +399,26 @@ class VispectFit:
                 if Flag == 0:
                     self.Id = Il
                 Flag=Flag+1
-                Sum = Sum + self.fcanal(Il,2,0)
-                if (int(self.fcanal(Il,1,1)) & 2) == 2 :
+                Sum = Sum + self.fncanal(Il,2,0)
+                if (int(self.fncanal(Il,1,1)) & 2) == 2 :
                     NbSommets=NbSommets+1
                     self.Isommet[NbSommets] = Il
-                if (self.fcanal(Il,2,0)) > Cmax:
-                    Cmax = self.fcanal(Il,2,0)
-        self.VisTable.ui.lblespectro.setText(self.vinfo['SourceName'])
-        self.VisTable.ui.lblvivo.setText(str(self.vinfo['TempoVivo']))
-        self.VisTable.ui.lblmorto.setText(str(self.vinfo['TempoTotal']))
+                if (self.fncanal(Il,2,0)) > Cmax:
+                    Cmax = self.fncanal(Il,2,0)
+# comentei por enquanto - mas isto deve sair daqui
+#        self.VisTable.ui.lblespectro.setText(self.vinfo['SourceName'])
+#        self.VisTable.ui.lblvivo.setText(str(self.vinfo['TempoVivo']))
+#        self.VisTable.ui.lblmorto.setText(str(self.vinfo['TempoTotal']))
 # Procedure pour determiner l'abscisse exacte  et la self.Resolution d'un pic
 # Determination de la pente du bruit de fond
 
     def ResAbsiPic(self,Ind,vInf,Mode):
-        """Calcula a abscissa exata e a resolução de um pico 
+        """Calcula a abscissa exata e a resolução de um pico
         Determina a inclinação do background
         """
         if Mode == 0 :
-            Y1 = (float(self.fcanal((Ind-1),2,0) + self.fcanal(Ind,2,0) + self.fcanal((Ind+1),2,0))/3)
-            Y2 = (float(self.fcanal((Inf-1),2,0) + self.fcanal(Inf,2,0) + self.fcanal((Inf+1),2,0))/3)
+            Y1 = (float(self.fncanal((Ind-1),2,0) + self.fncanal(Ind,2,0) + self.fncanal((Ind+1),2,0))/3)
+            Y2 = (float(self.fncanal((Inf-1),2,0) + self.fncanal(Inf,2,0) + self.fncanal((Inf+1),2,0))/3)
         if (Ind-vInf) == 0:
             A1=0.0
         else:
@@ -387,6 +427,7 @@ class VispectFit:
         self.IntZone(Ind,vInf,Mode)
         self.Absi = self.FNcanexact(0.5,Ind)
         self.Resol = float(self.FNcanexact(0.75,Ind) - self.FNcanexact(0.25,Ind))*self.slope*1.74
+#        self.Resol = float(self.Energy(self.FNcanexact(0.75,Ind)) - self.Energy(self.FNcanexact(0.25,Ind)))
 
 
 
@@ -394,7 +435,7 @@ class VispectFit:
         vdic={}
         vdic['it']   =pIt
         # mudar para pegar a energia da função Energy
-        vdic['energia']=pAbsi*self.slope+self.offset
+        vdic['energia']= self.Energy(pAbsi) #pAbsi*self.slope+self.offset
         vdic['area']=pArea
         vdic['bg']=pBgnd
         vdic['resol']=pResol
@@ -422,10 +463,10 @@ class VispectFit:
         if Deb == 0:
             Deb = 1
         for I in range(Deb,Fin+1):
-            Sum = Sum + self.fcanal(I,2,0)
+            Sum = Sum + self.fncanal(I,2,0)
         S = Kfin - Kdeb + 1
         if Mode == 0:
-            self.Bgnd = self.fcanal(Deb,2,0)+self.fcanal((Deb+1),2,0)+self.fcanal((Deb-1),2,0)+self.fcanal((Fin),2,0)+self.fcanal((Fin+1),2,0)+self.fcanal((Fin-1),2,0)
+            self.Bgnd = self.fncanal(Deb,2,0)+self.fncanal((Deb+1),2,0)+self.fncanal((Deb-1),2,0)+self.fncanal((Fin),2,0)+self.fncanal((Fin+1),2,0)+self.fncanal((Fin-1),2,0)
             self.Bgnd = float(float(self.Bgnd)/6)*S
         if Mode == 1:
             self.Bgnd = float(float(self.Y1+self.Y2)*S)/2
@@ -458,7 +499,7 @@ class VispectFit:
 #        for J in range(self.Id,self.Fi):
         for J in range(Id,Fi+1):
             Nc=Nc+1
-            if (int(self.fcanal(J,1,1)) & 2) == 2 :
+            if (int(self.fncanal(J,1,1)) & 2) == 2 :
                 Np=Np+1
                 Absi[Np] = J
                 OldAbsi[Np] = Absi[Np]
@@ -466,7 +507,7 @@ class VispectFit:
                 Dlmh[Np] = float((self.ro*(1+self.kres*Numeric.sqrt(Ener))))/(self.slope*2)
                 Alp[Np] = float(0.69315)/Dlmh[Np]**2
                 OldAlp[Np] = Alp[Np]
-                Azo[Np] = float(self.fcanal(J,2,0) - (J*self.A1+self.B1))
+                Azo[Np] = float(self.fncanal(J,2,0) - (J*self.A1+self.B1))
         Nx = Jv*Np
         A=Numeric.zeros([Nc+1,Nx+1], Numeric.Float64)
         C=Numeric.zeros([Nc+1], Numeric.Float64)
@@ -489,7 +530,7 @@ class VispectFit:
             L = 0
             for I in range(Id,Fi+1):
                 L=L+1
-                C[L] = float(self.fcanal(I,2,0)) - (float(I)*self.A1+self.B1)
+                C[L] = float(self.fncanal(I,2,0)) - (float(I)*self.A1+self.B1)
                 if C[L] <= 0.0 :
                     C[L] = 1.0
                 W[L] = float(1.0)/C[L]
@@ -563,7 +604,7 @@ class VispectFit:
                 for J in range(1,Np+1):
                     Absi[J] = OldAbsi[J]
                     Alp[J] = OldAlp[J]
-                    Azo[J] = self.fcanal(int(Absi[J]),2,0) - (Absi[J]*self.A1+self.B1)
+                    Azo[J] = self.fncanal(int(Absi[J]),2,0) - (Absi[J]*self.A1+self.B1)
                 Sortie = 0
                 Jv = 2
                 Nx = Jv*Np
@@ -586,10 +627,10 @@ class VispectFit:
                     else:
                         Yg[J,I] = Azo[J]*Numeric.exp(Mu)
                     Yt[I] = Yt[I] + Yg[J,I]
-                Res[I] = self.fcanal(K,2,0) - (K*self.A1+self.B1) - Yt[I]
+                Res[I] = self.fncanal(K,2,0) - (K*self.A1+self.B1) - Yt[I]
                 Socare = Socare + Res[I]*Res[I]*W[I]
-                if self.fcanal(K,2,0) <> 0 :
-                    Res[I] = float(Res[I]*Res[I])/self.fcanal(K,2,0)
+                if self.fncanal(K,2,0) <> 0 :
+                    Res[I] = float(Res[I]*Res[I])/self.fncanal(K,2,0)
                 Chi2 = Chi2 + Res[I]
             Xndl = Nc - Nx
             Chi2 = float(Chi2)/Xndl
@@ -653,3 +694,188 @@ class VispectFit:
                 A[I,J] = AB[I,K]
         return A
 
+
+
+def testSpecMaker(nivel = 4):
+    """function to test the vispect peak search algorithm against some generated spectra
+    To test, call the module with -t option and a spectrum file name (from SpecMaker test spectra).
+    There would be a CSV file with the same name as the spectrum file -- the assessment file generated by
+    SpecMaker. The output will be the comparison between the values of CSV file and calculated ones.
+    """
+    """Energy, Counts, Centroid, FWHM, Actual counts, Actual centroid """
+    import sys, time
+    import crtLerEspectro as lesp
+    import numpy as np
+
+    arquivos = ["CritLimit100.chn", "CritLimit10k.chn", "CritLimit1k.chn",  "LD-100.chn",  "LD-10k.chn",  "LD-1k.chn", "QCYKpeaks.chn"]
+    arquivosref = ["CritLimit100.csv", "CritLimit10k.csv", "CritLimit1k.csv",  "LD-100.csv",  "LD-10k.csv",  "LD-1k.csv", "QCYKpeaks.csv"]
+    j = 0
+    dirarq = "../espectros/SpecMaker/"
+
+    for j in range(len(arquivos)):
+        arq = arquivos[j]
+        arqref = arquivosref[j]
+        arquivo = dirarq + arq
+#        arquivo = "../espectros/SpecMaker/"+arq
+        vfit = VispectFit()
+        obj = lesp.LerVispect(arquivo)
+        data = obj.ler_MCAeCHN()
+        if data == None:
+            print "Erro ao ler arquivo"
+            return
+        vfit.Lt = data.info['TempoVivo']
+        vfit.vy=np.array(data.y[0],np.float64)
+        # data from SpecMaker manual as informed by email msg from Dr. Gilmore
+        data.info['slope'] = 0.26931
+        data.info['offset']= -3.87
+        data.info['enerquad'] = -4.71e-10
+        data.info['ro']    = 0.72
+        data.info['kres']  = 9.73e-4
+        data.info['widthquad']= -1.02e-7
+        data.info['Nivel'] = nivel
+        data.info['ArqCalib']  = ' '
+        resultado = vfit.vispectfit(data.x[0][0],data.x[0][-1],data.info).copy()
+        resultcomp = [[x['energia'],x['area'],x['fi'],x['resol'],x['erreur']] for x in [resultado[y] for y in range(len(resultado))]]
+#        print resultado, vfit.vy[1:10], data.x[0][1:10],data.x[0][-1],data.y[0][1:10]
+        """Energy, Counts, Centroid, FWHM, Actual counts, Actual centroid """
+        try:
+            tmparq = "/tmp/"+"ASS"+arq[:-3]+"CSV"
+            tres = open(tmparq, 'w')
+            for res in resultcomp:
+                tres.write("%7.2f, %10.2f, %12d, %4.2f, %5.5f\n" % (res[0],res[1],res[2],res[3],res[4]))
+            tres.close()
+        except:
+            print resultcomp
+        vfit = None
+        j += 1
+
+def testIAEA(nivel = 10):
+    """function to test the vispect peak search algorithm against some generated spectra
+    To test, call the module with -t option and a spectrum file name (from SpecMaker test spectra).
+    There would be a CSV file with the same name as the spectrum file -- the assessment file generated by
+    SpecMaker. The output will be the comparison between the values of CSV file and calculated ones.
+    """
+    """Energy, Counts, Centroid, FWHM, Actual counts, Actual centroid """
+    import sys, time, os
+    import crtLerEspectro as lesp
+    import numpy as np
+
+    arquivos = ["ADD10N1.ASC", "ADD1N1.ASC", "ADD3N1.ASC", "DISTORT.ASC" , "ADD1N100.ASC", "ADD1N3.ASC", "STRAIGHT.ASC"]
+    arquivosref = ["ADD10N1.REF", "ADD1N1.REF", "ADD3N1.REF", "DISTORT.REF" , "ADD1N100.REF", "ADD1N3.REF", "STRAIGHT.REF"]
+    dirarq = "../espectros/IAEA-1995/TSTSPEC/"
+    dirref = "../espectros/IAEA-1995/REFRSL/"
+    cmpprog = " wineconsole ../espectros/IAEA-1995/PROGS/CMPSPEC.EXE"
+    j = 0
+    for j in [0]:  #range(len(arquivos)):
+        arq = arquivos[j]
+        arqref = arquivosref[j]
+        arquivo = dirarq + arq
+        obj = lesp.LerVispect(arquivo)
+        data = obj.ler_MCAeCHN()
+        vfit = VispectFit()
+        if data == None:
+            print "Erro ao ler arquivo"
+            return
+        vfit.Lt = data.info['TempoVivo']
+        vfit.vy=np.array(data.y[0],np.float64)
+        data.info['slope'] = 0.2
+        data.info['offset']= 0.3
+        data.info['enerquad'] = -4.71e-10
+        data.info['ro']    = 0.5
+        data.info['kres']  = 0.039
+        data.info['widthquad']= -1.02e-7
+        data.info['ArqCalib']  = ' '
+        data.info['Nivel'] = nivel
+        resultado = vfit.vispectfit(data.x[0][0],data.x[0][-1],data.info).copy()
+        resultcomp = [[x['energia'],x['energia']*0.01,x['area'],x['erreur']] for x in [resultado[y] for y in range(len(resultado))]]
+        try:
+            tmparq = "/tmp/"+arq[:-3]+"RES"
+            tres = open(tmparq, 'w')
+            for res in resultcomp:
+                tres.write("%7.2f %5.2f %12d %9.2f\n" % (res[0],res[1],res[2],res[3]))
+            tres.close()
+#            print "Comparando %s e %s\n" % (dirref + arqref, arquivo)
+#            os.system("%s %s %s" % (cmpprog, dirref + arqref, tmparq))
+        except:
+            print resultcomp
+#        arquivoref = dirref + arqref
+#        try:
+#            arqr = open(arquivoref,'r')
+#        except:
+#            print resultcomp
+#            print "arquivo referencia nao aberto, terminando!"
+#        linhas = arqr.readlines()
+#        comparacao = []
+#        for l in linhas:
+        vfit = None
+        j += 1
+
+
+
+#The ASCII fileformat for both should be identical:
+#   - One peak per line
+#   - For each peak energy, its uncertainty, area, its uncertainty, [0 or 1]
+#   - The uncertainties must be absolute 1 standard deviation uncertainties
+#   - The four numbers must be separated by spaces only
+#   - The last number is meaningful in the reference file only. If 0, the
+#     peak is disregarded in the comparison, if 1, the peak is used if its
+#     energy is larger than 100 keV
+# {'meiavida': 0, 'bg': 3.0, 'area': 6.0, 'it': 0, 'elem': 0, 'energia': 1840.0253322580645, 'massa': 0, 'erreur': 57.735026918962575, 'lp': 9, 'fi': 7508.822580645161, 'resol': 0.81134516129036005, 'cps': 0.0015182186234817814, 'id': 7504}
+
+
+if __name__ == "__main__":
+    import sys,time
+    import crtLerEspectro as lesp
+    try:
+        arquivo=sys.argv[1]
+    except:
+        print "Chamar por: LerVispect nome-do-arquivo(CHN ou MCA) nome-do-arquivo.dat"
+        sys.exit()
+    obj = lesp.LerVispect(arquivo)
+    data = obj.ler_MCAeCHN()
+    try:
+       f = open(sys.argv[2],'w')
+       #print "datax =", data.x
+       print len(data.x[0]), len(data.y[0])
+       for i in range(len(data.x[0])):
+           f.write("%d\t%d\n" % (data.x[0][i],data.y[0][i]))
+       f.flush()
+       f.close()
+       print "espectro gravado em ",sys.argv[2]
+    except:
+       print "erro abrindo arquivo ",sys.argv[2]
+#    print "data = ",data.y
+#    print "info = ",data.info
+
+
+#        vobj = crtLerEspectro.LerVispect(vfile)
+#        vdata = vobj.ler_MCAeCHN()
+
+#        print "info = ",vdata.info
+#        print "datay = ",vdata.y[0],  "type(datay)",  type(vdata.y[0])
+  #      print "datax = ",vdata.x[0],  "type(datax)",  type(vdata.x[0])
+#        dataObject = vdata
+#        self.dataObjectsDict[legend] = dataObject
+# por enquanto estou atribuindo os valores de calibracao a todos os espectros,
+#        self.dataObjectsDict[legend].info['slope'] = 1.0
+#        self.dataObjectsDict[legend].info['offset']= 0.0
+#        self.dataObjectsDict[legend].info['ro']    = 1.0
+#        self.dataObjectsDict[legend].info['kres']  = 1.0
+#        self.dataObjectsDict[legend].info['ArqCalib']  = ' '
+
+
+#The first command-line argument is supposed to be the name of the reference
+#file, the second of the file to be tested.
+#The ASCII fileformat for both should be identical:
+#   - One peak per line
+#   - For each peak energy, its uncertainty, area, its uncertainty, [0 or 1]
+#   - The uncertainties must be absolute 1 standard deviation uncertainties
+#   - The four numbers must be separated by spaces only
+#   - The last number is meaningful in the reference file only. If 0, the
+#     peak is disregarded in the comparison, if 1, the peak is used if its
+#     energy is larger than 100 keV
+
+
+#        Res_Correl = self.Resolution(self.Energy((self.ideb+self.ifin)/2))
+#        Nc_Correl = int(Res_Correl/self.vinfo['slope']) -2
+#        print "rescorrel: %4.4f   nccorrel: %5d   Res_Correl: %4.4f  Nc_Correl: %5d\n" % (rescorrel, nccorrel, Res_Correl, Nc_Correl)

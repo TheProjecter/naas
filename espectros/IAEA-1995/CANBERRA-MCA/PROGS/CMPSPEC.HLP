@@ -1,0 +1,39 @@
+This is the CMPSPEC program originally written by M. Blaauw in Nov/Dec 1995
+for the IAEA intercomparison of gamma-ray spectrum analysis programs.
+It is documented in the readme.txt file on the IAEA diskette.
+
+The program reads and compares two lists of spectrum analysis files.
+
+The first two command-line arguments are mandatory, the rest optional.
+
+The first command-line argument is supposed to be the name of the reference
+file, the second of the file to be tested.
+The ASCII fileformat for both should be identical:
+   - One peak per line
+   - For each peak energy, its uncertainty, area, its uncertainty, [0 or 1]
+   - The uncertainties must be absolute 1 standard deviation uncertainties
+   - The four numbers must be separated by spaces only
+   - The last number is meaningful in the reference file only. If 0, the
+     peak is disregarded in the comparison, if 1, the peak is used if its
+     energy is larger than 100 keV
+
+The other, optional command-line arguments are:
+-f value     the ratio of the counting time of the reference spectrum to the
+	     counting time of the measured spectrum. If no factor is
+	     specified on the command-line, it is assumed that this
+	     factor is 20.0, as it was in the IAEA intercomparison in
+	     December 1995.
+-s           short output is generated, easier to handle with spreadsheets
+-r           a bias factor is determined as the weighted average of the peak
+	     areas in the two lists and applied before comparing the lists
+-p value     Criterion in terms of FWHM for matching peaks: If the distance
+	     between peaks in the two lists is larger than this, no match
+	     is established.
+-m           Merge peaks in the list given in the second file to suppress
+	     the effects of incorrect deconvolution. The same citerion for
+	     merging is applied as for matching.
+
+This program allocates memory dynamically: If dealing with long lists in
+a MS-DOS window under Windows, it may run out of memory. Change the settings
+in the *.PIF file of that window (Windows 3.*) of on the properties of it
+(Windows 95) or do whatever necessary to give it some 200 kB to run in.

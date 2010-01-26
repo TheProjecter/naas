@@ -1,0 +1,51 @@
+Limit of Detection Spectra
+==========================
+
+Three 8192 channel spectra with average continuum levels of 100, 1000 and 10,000 counts per channel 
+each containing 50 peaks. Each peak is a Gaussian distribution and contains the number of counts 
+equivalent to the 95% confidence Limit of Dectection, taking into account the average continuum level 
+(b), the peak width (n) at the specified. The background width (m) is fixed at 5 channels on each 
+side of the peak when making the detection limit calculation.
+
+The equation for Ld is 2.71 + 3.29 × (Std. Uncert of peak background)
+That reduces to Ld = 2.71 32.9 × sqrt[ n × b × (1 + n/2m) ]
+n is calculated as 2 × FWHM (channels) × 2.807 / 2.355, rounded up to the next integer.
+2.807 is the coverage factor for 99.5% of the whole peak area.
+When SpecMaker created the spectrum ,the counts in the peak were spread, as a Gaussian 
+distribution, across those n channels.
+
+The 50 peaks are superimposed on the continuum 40 keV apart from 50 keV up to 2010 keV.
+
+
+Spectrum		Continuum
+			(counts per channel)
+LD-100			100
+LD-1k			1,000
+LD-10k			10,000
+
+
+The 'LOD-an1' folder contains spectra in the ORTEC .an1 format. (This folder also holds the
+GammaVision .sdf and .lib files used in the example tests.)
+The 'LOD-.chn' folder contains spectra in the ORTEC .chn format.
+The 'LOD-csv' folder contains the SpecMaker output csv files listing the peaks positions
+and the expected number of counts in the peaks, together with the expected position and FWHM.
+An example follows:
+
+The 'LOD Info.txt' file is this document.
+The 'LOD-an1.zip' compressed file carries the an1 files and the associated .csv files.
+The 'LOD-chn.zip' compressed file carries the chn files and the associated .csv files.
+The 'LOD Assessments.zip' compressed file carries a number pdf files illustrating the
+use of SpecMaker in assessing the performance of CompAct, FitzPeaks and GammaVision. These files
+should be regarded as examples, not as definitive performance indicators. These files carry
+copyright restrictions and must not be reported or published elsewhere.
+
+===================
+Spectrum File: LD-100.chn						
+Energy scale: 0.269309 keV/channel					
+Energy	Counts	Centroid	FWHM		Actual counts	Actual centroid
+50	362	200.0230918	0.764702094	362		200.0359116
+90	398	348.5515047	0.803048691	396		348.5555556
+130	398	497.0799947	0.841067627	399		497.0877193
+etc.
+===================
+

@@ -20,6 +20,11 @@ class LerVispect:
         self.meses={"JAN":"01","FEV":"02","FEB":"02","MAR":"03","ABR":"04","APR":"04","MAI":"05","MAY":"05","JUN":"06","JUL":"07","AGO":"08","AUG":"08","SET":"07","SEP":"07","OUT":"10","OCT":"10","NOV":"11","DEZ":"12","DEC":"12"}
 
     def ler_MCAeCHN(self):
+        """this function is deprecated; replace all the call by the new function ler_arquivo()"""
+        return self.ler_arquivo()
+
+    def ler_arquivo(self):
+        """read a spectrum file and create a DataObject to hold its data"""
         output = DataObject.DataObject()
         output.info["SourceType"] = "SpecFile"
         output.info["SourceName"] = self.arquivo
@@ -27,10 +32,20 @@ class LerVispect:
         output.info['FileName']   = self.arquivo
         output.info['selectiontype'] = "1D"
         self.tipo = string.upper(self.arquivo[-3:])
+        # EG&ORTEC file
         if self.tipo == 'CHN':
             output.data = self.ler_CHN()
-        else:
+        # Canberra S100 file MCA
+        elif self.tipo == 'MCA':
             output.data = self.ler_MCA()
+        # ASC file from IAEA Intercomparison program
+        elif self.tipo == 'ASC':
+            output.data = self.ler_ASC()
+            
+        
+        if output.data == None or len(output.data) == 0:
+            print (output.data == None), len(output.data)
+            return None
         output.info['TempoTotal']   = self.tt
 #        print self.tv
         output.info['TempoVivo']   = self.tv
@@ -45,12 +60,15 @@ class LerVispect:
         output.info['JaCalculado']   = 0
         output.info['slope'] = 0
         output.info['offset']= 0
+        output.info['enerquad']=0
         output.info['ro']    = 0
         output.info['kres']  = 0
+        output.info['widthquad'] = 0
         output.info['ArqCalib']  = ''
         output.info['Amostra']  = 0
         output.info['ResCalculo']  = 0
         output.info['lElem']  = ''
+        output.info['NumCanais']=self.canais
 
 
         ch0 =  0
@@ -78,7 +96,10 @@ class LerVispect:
         self.hora=p5
         # espaços em branco
         p6=fespec.read(4)
-#        print p6
+        p6u = unpack('l',p6)[0]
+        # numero de canais (pega 16 bits i.e., 2 bytes)
+        self.canais = p6u >> 16
+#        print self.canais
 #        print "Parametros do arquivo CHN - sfontes.chn"
 #        print p1
         self.tv=float(unpack('l',p3)[0])/50
@@ -91,11 +112,12 @@ class LerVispect:
 #        print p6,
 # ler dados do arquivo CHN só as contagens e grava na saida
         i=0
-        a=np.zeros([8200])
-        while i<8191:
+        a=np.zeros([self.canais])
+        while i<self.canais:
             a[i]=unpack('l',fespec.read(4))[0]
             i = i + 1
         fespec.close()
+#        print a[1:10]
         return a
 
     def ler_MCA(self):
@@ -114,8 +136,12 @@ class LerVispect:
         # espacos
          p41=fespec.read(32)
         # espacos
-         p42=fespec.read(32)
-        # espacos
+         p42=fespec.read(28)
+        # num. de canais
+         p5 = fespec.read(4)
+         p5u = unpack('l',p5)[0]
+        # numero de canais (pega 16 bits i.e., 2 bytes)
+         self.canais = p5u >> 16
 #        print "Parametros do arquivo CHN - sfontes.chn"
          self.tv=float(unpack('l',p2)[0])/100
          self.tt=float(unpack('l',p3)[0])/100
@@ -126,19 +152,40 @@ class LerVispect:
 #        print p42
 # ler dados do arquivo CHN só as contagens e grava na saida
          i=0
-         a=np.zeros([8200])
-         while i<8191:
+         a=np.zeros([self.canais])
+         while i < self.canais:
             a[i]=unpack('l',fespec.read(4))[0]
             i = i + 1
          fespec.close()
          return a
         except:
-         msg = qt.QMessageBox(self)
-         msg.setIcon(qt.QMessageBox.Critical)
-         msg.setText("Erro nome do arquivo (acentuação!): %s" % (sys.exc_info()[1]))
-         msg.exec_()
-         a=np.zeros([8200])
-         return a
+            return []
+
+    def ler_ASC(self):
+        try:
+            fespec=open(self.arquivo,'r')
+            linhas = fespec.readlines()
+            fespec.close()
+            # tempo total
+            p1 = float(linhas[0])
+            # tempo vivo
+            p2 = float(linhas[1])
+            self.tt=p1
+            self.tv=p2
+            self.canais = 8191
+            a = [int(x) for x in linhas[2:]]
+            return np.asarray(a,dtype=int)
+#            i = 0
+#            a = np.zeros([self.canais])
+#            print "p1, p2, type(a)",p1, p2, type(a)
+#            while i < self.canais:
+#                a[i] = int(linhas[2+i])
+#                i += 1
+        except:
+            print "nao consegui abrir arquivo", self.arquivo
+            return []
+            
+    
 
 if __name__ == "__main__":
     import sys,time
