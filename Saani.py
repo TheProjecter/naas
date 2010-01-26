@@ -109,6 +109,8 @@ class startGui(QtGui.QMainWindow):
         lerCalib = self.createAction(u"&Ler Calibração",self.lerCalibracao,None,None,u"Ler Calibração de um Arquivo")
         calcCalib = self.createAction(u"&Calcular Calibração",self.calcularCalib,None,None,u"Calcular Calibração a partir do Espectro")
         entCalib = self.createAction(u"&Entrar Calibração",self.entrarCalib,None,None,u"Digitar parâmetros da Calibração")
+
+# barra de menus
         menubar = self.menuBar()
         mnuArquivo = menubar.addMenu('&Arquivo')
         mnuArquivo.addAction(abrirEsp)
@@ -139,10 +141,10 @@ class startGui(QtGui.QMainWindow):
 
 
         self.dirty = False
-##        self.createStatusBar()
+        self.createStatusBar()
         # create progress bar
-##        self.pb = QtGui.QProgressBar(self.statusBar())
-##        self.statusBar().addPermanentWidget(self.pb)
+        self.pb = QtGui.QProgressBar(self.statusBar())
+        self.statusBar().addPermanentWidget(self.pb)
         # lista de threads
         self.threads = []
 
@@ -698,11 +700,26 @@ class startGui(QtGui.QMainWindow):
              return
         if os.path.exists(vfile):
             fileToOpen = open(vfile)
-            initialFile = [string.split(line) for line in fileToOpen]
-            self.dataObjectsDict[legend].info['slope'] =  float(initialFile[0][1])
-            self.dataObjectsDict[legend].info['offset']=  float(initialFile[0][2])
-            self.dataObjectsDict[legend].info['ro']    =  float(initialFile[1][0])
-            self.dataObjectsDict[legend].info['kres']  =  float(initialFile[1][1])
+            linhas = fileToOpen.readlines()
+#            initialFile = [string.split(line) for line in fileToOpen]
+            energyterms = linhas[0].split()
+            linha0 = linhas[0].split()
+#            vartmp, slope, offset = linhas[0].split()
+            linha1 = linhas[1].split
+#            ro, kres = linhas[1].split()
+            self.dataObjectsDict[legend].info['slope'] =  float(linha0[1])   #float(initialFile[0][1])
+            self.dataObjectsDict[legend].info['offset']=  float(linha0[2]) # float(initialFile[0][2])
+            try:
+                self.dataObjectsDict[legend].info['enerquad'] = float(linha0[3])
+            except:
+                self.dataObjectsDict[legend].info['enerquad'] = 0.0
+                                                                
+            self.dataObjectsDict[legend].info['ro']    =  float(linha1[0])     #float(initialFile[1][0])
+            self.dataObjectsDict[legend].info['kres']  =  float(linha1[1])   # float(initialFile[1][1])
+            try:
+                self.dataObjectsDict[legend].info['widthquad'] = float(linha1[2])
+            except:
+                self.dataObjectsDict[legend].info['widthquad'] = 0.0
             self.dataObjectsDict[legend].info['ArqCalib']  = "%s" %(vfile)
             self.dataObjectsDict[legend].info['FakeCal']=False
             #self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
@@ -714,9 +731,12 @@ class startGui(QtGui.QMainWindow):
             raise "IOError",("Arquivo não existe %s " % vfile)
             self.dataObjectsDict[legend].info['slope'] =   1.0
             self.dataObjectsDict[legend].info['offset']=   0.0
+            self.dataObjectsDict[legend].info['enerquad'] = 0.0
             self.dataObjectsDict[legend].info['ro']    =   0.0
             self.dataObjectsDict[legend].info['kres']  =   1.0
+            self.dataObjectsDict[legend].info['widthquad'] = 0.0
             self.dataObjectsDict[legend].info['ArqCalib']   = ''
+            self.dataObjectsDict[legend].info['FakeCal']=True
             #self.ui.lblcalibracao.setText(self.pprojeto['ArqCalib'])
             return 1
 
@@ -1235,7 +1255,7 @@ class startGui(QtGui.QMainWindow):
             return info,xdata,ydata
 
 
-    def vispectLer(self):
+    def vispectLer(self, arquivo = None):
         """ Efetua a leitura do arquivo de espectro e apresenta o grafico na tela
              1. Abre janela para localizar o arquivo
              2. Executa a rotina ler_MCAeCHN, passando como parametro o arquivo
@@ -1252,7 +1272,7 @@ class startGui(QtGui.QMainWindow):
         if os.path.exists(self.configDir):cwd =self.configDir
         openfile.setDirectory(cwd)
         ret = openfile.exec_()
-# coloquei devido a problemas com arquivo ou diretorio com acentuacao
+    # coloquei devido a problemas com arquivo ou diretorio com acentuacao
         try:
             vfile=str(openfile.selectedFiles()[0])
         except:
@@ -1261,18 +1281,18 @@ class startGui(QtGui.QMainWindow):
             msg.setText("Erro nome do arquivo (acentuação!): %s" % (sys.exc_info()[1]))
             msg.exec_()
             return
-#verificar no Linux.....
+    #verificar no Linux.....
         n=string.rfind(vfile,'\\')
         legend=vfile[n+1:]
         try:
-           existe=self.dataObjectsDict[legend].info["SourceName"]
-           msg = qt.QMessageBox(self)
-           msg.setIcon(qt.QMessageBox.Critical)
-           msg.setText("Arquivo já foi lido, verifique!")
-           msg.exec_()
-           return
+            existe=self.dataObjectsDict[legend].info["SourceName"]
+            msg = qt.QMessageBox(self)
+            msg.setIcon(qt.QMessageBox.Critical)
+            msg.setText("Arquivo já foi lido, verifique!")
+            msg.exec_()
+            return
         except:
-           existe="Não existe, pode ser incluido"
+            existe="Não existe, pode ser incluido"
 
 #        print n
 #        print filename[0][n+1:]
