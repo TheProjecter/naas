@@ -103,7 +103,7 @@ class VispectFit:
         nccorrel = int(round(float(rescorrel)/self.slope)) - 2
         canalcorrel=0
 #        for j in range(i,int(self.ifin - nccorrel*3)+1):
-        for j in range(i,int(self.ifin - nccorrel*3)):
+        for j in range(i,int(self.ifin - nccorrel*3)+1):
             kcan = kcan +1
             contenuailes = contenuailes - Numeric.sqrt((self.fncanal(j-nccorrel*2,2,0))) + Numeric.sqrt((self.fncanal(j+nccorrel*3,2,0)))
             contenucentre = contenucentre - Numeric.sqrt((self.fncanal(j,2,0))) + Numeric.sqrt((self.fncanal(j+nccorrel,2,0)))
@@ -339,7 +339,7 @@ class VispectFit:
         self.Id=0
         self.ideb=0
 #        for Il in range(self.ideb,self.ifin+1):
-        for Il in range(self.ideb,self.ifin):
+        for Il in range(self.ideb,self.ifin+1):
             vres=int(self.fncanal(Il,1,0))
             if (vres & 1) == 0:
                 if Flag <> 0 :
@@ -347,7 +347,7 @@ class VispectFit:
                     self.Y1 = float(self.fncanal((self.Id-1),2,0) + self.fncanal(self.Id,2,0) + self.fncanal((self.Id+1),2,0))/3
                     self.Y2 = float(self.fncanal((self.Fi-1),2,0) + self.fncanal(self.Fi,2,0) + self.fncanal((self.Fi+1),2,0))/3
                     # por algum motivo quando o Nivel de Sensibilidade eh muito baixo, esta dando erro neste pedaco
-                    # self.Id - self.Fi = 0 
+                    # self.Id - self.Fi = 0
                     # coloquei o try para eliminar este problema, mas nao sei se esta correto.
                     try:
                         self.A1 = float(self.Y1-self.Y2)/(self.Id-self.Fi)
@@ -695,6 +695,69 @@ class VispectFit:
         return A
 
 
+##############################################################
+
+
+def testDissert(nivel = 15):
+    """function to test the vispect peak search algorithm against some spectra used
+    in the Silvio Master Thesis.
+    The output will be the comparison between the values of CSV file and calculated ones.
+    """
+    """Energy, Counts, Centroid, FWHM, Actual counts, Actual centroid """
+    import sys, time
+    import crtLerEspectro as lesp
+    import numpy as np
+
+    #arquivos = ["CritLimit100.chn", "CritLimit10k.chn", "CritLimit1k.chn",  "LD-100.chn",  "LD-10k.chn",  "LD-1k.chn", "QCYKpeaks.chn"]
+    arquivos = ["MT4-B.CHN", "112-1B.CHN"]
+    #arquivosref = ["CritLimit100.csv", "CritLimit10k.csv", "CritLimit1k.csv",  "LD-100.csv",  "LD-10k.csv",  "LD-1k.csv", "QCYKpeaks.csv"]
+    arquivosref = ["QCYKpeaks.csv","QCYKpeaks.csv"]
+    j = 0
+    dirarq = "../espectros/Silvio-Thesis/"
+
+    for j in range(len(arquivos)):
+        arq = arquivos[j]
+        arqref = arquivosref[j]
+        arquivo = dirarq + arq
+#        arquivo = "../espectros/SpecMaker/"+arq
+        vfit = VispectFit()
+        obj = lesp.LerVispect(arquivo)
+        data = obj.ler_MCAeCHN()
+        if data == None:
+            print "Erro ao ler arquivo"
+            return
+        vfit.Lt = data.info['TempoVivo']
+        vfit.vy=np.array(data.y[0],np.float64)
+        # data from SpecMaker manual as informed by email msg from Dr. Gilmore
+        data.info['slope'] = 0.2491279989480972
+        data.info['offset']= -.9475258588790894
+        data.info['enerquad'] = 0.0
+        data.info['ro']    = 0.5267921090126038
+        data.info['kres']  = 6.619893759489059E-002
+        data.info['widthquad']= 0.0
+        data.info['Nivel'] = nivel
+        data.info['ArqCalib']  = ' '
+        resultado = vfit.vispectfit(data.x[0][0],data.x[0][-1],data.info).copy()
+        resultcomp = [[x['energia'],x['area'],x['fi'],x['resol'],x['erreur']] for x in [resultado[y] for y in range(len(resultado))]]
+#        print resultado, vfit.vy[1:10], data.x[0][1:10],data.x[0][-1],data.y[0][1:10]
+        """Energy, Counts, Centroid, FWHM, Actual counts, Actual centroid """
+        try:
+            tmparq = "/tmp/"+"SLucDis"+arq[:-3]+"CSV"
+            tres = open(tmparq, 'w')
+            tres.write("Energia, Contagem, Centroide, Resolucao, Erro\n")
+            for res in resultcomp:
+                tres.write("%7.2f, %10.2f, %12d, %4.2f, %5.5f\n" % (res[0],res[1],res[2],res[3],res[4]))
+            tres.close()
+        except:
+            print resultcomp
+        vfit = None
+        j += 1
+
+
+
+########-------------------------------#######################    
+
+
 
 def testSpecMaker(nivel = 4):
     """function to test the vispect peak search algorithm against some generated spectra
@@ -707,8 +770,10 @@ def testSpecMaker(nivel = 4):
     import crtLerEspectro as lesp
     import numpy as np
 
-    arquivos = ["CritLimit100.chn", "CritLimit10k.chn", "CritLimit1k.chn",  "LD-100.chn",  "LD-10k.chn",  "LD-1k.chn", "QCYKpeaks.chn"]
-    arquivosref = ["CritLimit100.csv", "CritLimit10k.csv", "CritLimit1k.csv",  "LD-100.csv",  "LD-10k.csv",  "LD-1k.csv", "QCYKpeaks.csv"]
+    #arquivos = ["CritLimit100.chn", "CritLimit10k.chn", "CritLimit1k.chn",  "LD-100.chn",  "LD-10k.chn",  "LD-1k.chn", "QCYKpeaks.chn"]
+    arquivos = ["QCYKpeaks.chn"]
+    #arquivosref = ["CritLimit100.csv", "CritLimit10k.csv", "CritLimit1k.csv",  "LD-100.csv",  "LD-10k.csv",  "LD-1k.csv", "QCYKpeaks.csv"]
+    arquivosref = ["QCYKpeaks.csv"]
     j = 0
     dirarq = "../espectros/SpecMaker/"
 
@@ -741,6 +806,7 @@ def testSpecMaker(nivel = 4):
         try:
             tmparq = "/tmp/"+"ASS"+arq[:-3]+"CSV"
             tres = open(tmparq, 'w')
+            tres.write("Energia, Contagem, Centroide, Resolucao, Erro\n")
             for res in resultcomp:
                 tres.write("%7.2f, %10.2f, %12d, %4.2f, %5.5f\n" % (res[0],res[1],res[2],res[3],res[4]))
             tres.close()
@@ -810,7 +876,37 @@ def testIAEA(nivel = 10):
         vfit = None
         j += 1
 
+def toDAT(especname=None,filename=None):
+    """An utility function to write a spectrum to a ascii file, containing
+    channel number and count only"""
 
+    import crtLerEspectro as lesp
+
+    if especname is None:
+        especname = "../espectros/cp-1a.mca"
+        # if especname was not supplied, give the same base name to output
+        # file but the extension (dat)
+        if filename is None:
+            filename = "/tmp/cp-1a.dat"
+    # especname was supplied
+    if filename is None:
+        # but filename not; then pick a name generated by os.tmpnam() function
+        import os
+        filename = os.tmpnam()
+    
+    obj = lesp.LerVispect(especname)
+    data = obj.ler_MCAeCHN()
+    try:
+       f = open(filename,'w')
+       #print "datax =", data.x
+       print len(data.x[0]), len(data.y[0])
+       for i in range(len(data.x[0])):
+           f.write("%d\t%d\n" % (data.x[0][i],data.y[0][i]))
+       f.flush()
+       f.close()
+       print "Sucesso! Espectro gravado em ", filename
+    except:
+       print "Erro abrindo arquivo de saida ...",filename
 
 #The ASCII fileformat for both should be identical:
 #   - One peak per line
