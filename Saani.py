@@ -132,12 +132,12 @@ class startGui(QtGui.QMainWindow):
         self.settings = QtCore.QSettings()
         self.recenteFiles=[]
         recenteFiles = self.settings.value("RecenteFiles").toList()
-        mnuArquivo.addSeparator()
-        for arq in recenteFiles[:]:
-            self.recenteFiles+=[arq.toString()]
-            aq1 = self.createAction(arq.toString(),self.abrirEsp,False,"open","aq1 recente",None,"triggered()")
-            self.ultimo=aq1
-            mnuArquivo.addAction(aq1)
+#        mnuArquivo.addSeparator()
+#        for arq in recenteFiles[:]:
+#            self.recenteFiles+=[arq.toString()]
+#            aq1 = self.createAction(arq.toString(),abrirEsp,False,"open","aq1 recente",None,"triggered()")
+#            self.ultimo=aq1
+#            mnuArquivo.addAction(aq1)
 
 
         self.dirty = False
@@ -713,7 +713,7 @@ class startGui(QtGui.QMainWindow):
                 self.dataObjectsDict[legend].info['enerquad'] = float(linha0[3])
             except:
                 self.dataObjectsDict[legend].info['enerquad'] = 0.0
-                                                                
+
             self.dataObjectsDict[legend].info['ro']    =  float(linha1[0])     #float(initialFile[1][0])
             self.dataObjectsDict[legend].info['kres']  =  float(linha1[1])   # float(initialFile[1][1])
             try:
