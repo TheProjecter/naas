@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import Numeric
-#import numpy as np
+#import Numeric
+import numpy.oldnumeric as Numeric
 #import crtConcentracao
 #import Elementos
 #import QtBlissGraph
@@ -124,6 +124,9 @@ class VispectFit:
                         ksommet = il+1
                         break
                 ener = self.Energy(ksommet)
+                ener2 = ksommet*self.slope + self.offset
+                if ener - ener2 != 0.0:
+                    print "Energy(ksommet): ",ener, "    ksommet*slop + offset: ", ener2
                 lmh = float(self.ro*(1 + self.kres*Numeric.sqrt(ener)))/self.slope
                 if self.Id < oldfi:
                     self.Id = oldfi + 1
@@ -134,6 +137,9 @@ class VispectFit:
                         ksommet = il+1
                         break
                 ener = self.Energy(ksommet)
+                ener2 = ksommet*self.slope + self.offset
+                if ener - ener2 != 0.0:
+                    print "2o caso ==> Energy(ksommet): ",ener, "    ksommet*slop + offset: ", ener2
                 lmh = float(self.ro*(1 + self.kres*Numeric.sqrt(ener)))/self.slope
                 if (self.Fi - ksommet + 1) > int(round(3*lmh)):
                     self.Fi = ksommet + int(round(2*lmh))
@@ -427,8 +433,8 @@ class VispectFit:
         self.IntZone(Ind,vInf,Mode)
         self.Absi = self.FNcanexact(0.5,Ind)
         self.Resol = float(self.FNcanexact(0.75,Ind) - self.FNcanexact(0.25,Ind))*self.slope*1.74
-        self.NResol = self.Resolution(self.Energy(self.Absi))
-        print "diferença: Resol - NResol: ", self.Resol - self.NResol
+        #self.NResol = self.Resolution(self.Energy(self.Absi))
+        #print "diferença: Resol - NResol: ", self.Resol - self.NResol
 
 #        self.Resol = float(self.Energy(self.FNcanexact(0.75,Ind)) - self.Energy(self.FNcanexact(0.25,Ind)))
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<XMI verified="false" xmi.version="1.2" timestamp="2010-01-19T17:16:03" xmlns:UML="http://schema.omg.org/spec/UML/1.3" >
+<XMI verified="false" xmi.version="1.2" timestamp="2010-04-19T11:32:44" xmlns:UML="http://schema.omg.org/spec/UML/1.3" >
  <XMI.header>
   <XMI.documentation>
    <XMI.exporter>umbrello uml modeller http://uml.sf.net</XMI.exporter>
@@ -35,11 +35,65 @@
         <UML:DataType stereotype="datatype" visibility="public" isSpecification="false" namespace="Datatypes" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="ZRoN2E1AEw6I" name="set" />
        </UML:Namespace.ownedElement>
       </UML:Package>
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="W5gKPQozW6Fz" name="lstarqs" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="Ydb8n5DTNasB" name="recupera_arquivo" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="CZE3hAetf3wu" name="atualiza parametros espectro UI" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="JWtLgfx1OIUZ" name="espectro" >
+       <UML:Classifier.feature>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="iTo2u0lZJHSd" type="tPkbIHqNQ2oO" comment="nome do arquivo do espectro" name="nome_do_arquivo" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="TbKOU2pH2jHn" type="eA2xw491qSBO" comment="cabeçalho do arquivo com as informações gravadas pelo programa de aquisição" name="cabecalho_espectro" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="tnXrui1tfahF" type="eA2xw491qSBO" comment="parâmetros de calibração (tipo: energia ou resolução; tipo de função: linear, polinômio, quadrática; parâmetros)." name="calibracao" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="dM4cCvPhmIPl" type="V6AplHpn62jZ" comment="tempo vivo - obtido do arquivo do espectro ou informado pelo usuario, caso não disponível" name="live_time" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="95MrIPGV1AAu" type="V6AplHpn62jZ" comment="tempo total de medida - obtido do arquivo do espectro ou informado pelo usuário" name="total_time" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="pKgNofDR1F3B" type="1xbwUOdDMh62" comment="data e hora do início da contagem" name="data_contagem" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="ARsuhGfoJzfb" type="1xbwUOdDMh62" comment="data e hora do final da irradiação" name="data_irrad" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="Pv6Q3HJqZxCN" type="1xbwUOdDMh62" comment="tempo total de irradiação" name="tempo_irrad" />
+       </UML:Classifier.feature>
+      </UML:Class>
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="IZ2iCynmtFaJ" name="dicionário" />
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="ISIAHGVgZCYt" name="analise" >
+       <UML:Classifier.feature>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="x4LS1Tf8YdzY" type="GzFqCl47mab3" comment="dicionario dos picos (energia, area, bg, resolucao, canal inicial, canal final, canal mediana, largura em canais, contagem por segundo, erro na contagem)" name="dic_peaks" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="QpKgFaqUpJBO" type="1xbwUOdDMh62" comment="senbilidade utilizada na busca (default = 15)" initialValue="15" name="sensibilidade" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="6pDGd8MpyefX" type="1xbwUOdDMh62" comment="número de desvios padrões na busca (default =1, 2 ou 3)" initialValue="1" name="num_desvios" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="L5EDRpJlBxMU" type="1xbwUOdDMh62" comment="Especifica o tipo do arquivo: amostra (1) ou padrão (2)" initialValue="1" name="tipo_arquivo" />
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="ZqEjILjviMeP" type="GzFqCl47mab3" comment="Quando o espectro se referir a um padrão:&#xa;elemento, energia, meia vida, concentração e erro na concentração." name="dic_padrao" />
+       </UML:Classifier.feature>
+      </UML:Class>
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="VjHDNT8SnYRG" name="lista" />
+      <UML:Association visibility="public" isSpecification="false" namespace="Logical View" xmi.id="09xgOVVtKo2i" comment="Se já detectou picos, eles estarão na classe picos. Cada busca com parâmetros diferentes (sensibilidade, num. de desvios e algoritmo) gerará uma classe picos com os parâmetros de busca." name="" >
+       <UML:Association.connection>
+        <UML:AssociationEnd changeability="changeable" visibility="public" isNavigable="true" isSpecification="false" multiplicity="1" xmi.id="KjyV6ReYECyT" type="JWtLgfx1OIUZ" name="" aggregation="aggregate" />
+        <UML:AssociationEnd changeability="changeable" visibility="public" isNavigable="true" isSpecification="false" multiplicity="*" xmi.id="MYFB5an3hik6" type="ISIAHGVgZCYt" name="" aggregation="none" />
+       </UML:Association.connection>
+      </UML:Association>
+      <UML:Class visibility="public" isSpecification="false" namespace="Logical View" isAbstract="false" isLeaf="false" isRoot="false" xmi.id="GzFqCl47mab3" name="dictionary" />
      </UML:Namespace.ownedElement>
      <XMI.extension xmi.extender="umbrello" >
       <diagrams>
-       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpubliconly="1" showpackage="1" showstereotype="1" name="diagrama de classe" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="645" canvaswidth="1008" localid="" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="x6tiNlCuf7Kd" documentation="" showscope="1" snapgrid="0" showatts="1" type="1" >
-        <widgets/>
+       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpubliconly="1" showpackage="1" showstereotype="1" name="diagrama de classe" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="770" canvaswidth="957" localid="" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="x6tiNlCuf7Kd" documentation="" showscope="1" snapgrid="0" showatts="1" type="1" >
+        <widgets>
+         <classwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" showoperations="1" usesdiagramusefillcolor="0" showpubliconly="1" showpackage="1" x="60" showattsigs="601" showstereotype="1" y="94" showattributes="1" font="DejaVu Sans,9,-1,5,75,0,0,0,0,0" width="186" isinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="JWtLgfx1OIUZ" showscope="1" height="142" showopsigs="601" />
+         <classwidget linecolor="#ff0000" usesdiagramfillcolor="0" linewidth="none" showoperations="1" usesdiagramusefillcolor="0" showpubliconly="1" showpackage="1" x="470" showattsigs="601" showstereotype="1" y="129" showattributes="1" font="DejaVu Sans,9,-1,5,75,0,0,0,0,0" width="168" isinstance="0" usefillcolor="1" fillcolor="#ffff00" xmi.id="ISIAHGVgZCYt" showscope="1" height="97" showopsigs="601" />
+        </widgets>
+        <messages/>
+        <associations>
+         <assocwidget indexa="1" indexb="1" widgetaid="JWtLgfx1OIUZ" linecolor="none" totalcounta="2" xmi.id="09xgOVVtKo2i" widgetbid="ISIAHGVgZCYt" totalcountb="2" type="501" linewidth="none" >
+          <linepath>
+           <startpoint startx="246" starty="146" />
+           <endpoint endx="470" endy="146" />
+          </linepath>
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="248" showstereotype="1" y="125" text="1" font="DejaVu Sans,9,-1,5,50,0,0,0,0,0" pretext="" role="701" width="16" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="ARjvDLKWAtnS" height="19" />
+          <floatingtext linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="452" showstereotype="1" y="125" text="*" font="DejaVu Sans,9,-1,5,50,0,0,0,0,0" pretext="" role="702" width="14" isinstance="0" posttext="" usefillcolor="1" fillcolor="none" xmi.id="6uNPk6xsVgnh" height="19" />
+         </assocwidget>
+        </associations>
+       </diagram>
+       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpubliconly="1" showpackage="1" showstereotype="1" name="atualizacao parametros espectro na UI" font="Bitstream Vera Sans,9,-1,5,50,0,0,0,0,0" canvasheight="770" canvaswidth="957" localid="" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="37Xmpx8MzYnu" documentation="" showscope="1" snapgrid="0" showatts="1" type="6" >
+        <widgets>
+         <activitywidget linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="135" showstereotype="1" y="143" font="Bitstream Vera Sans,9,-1,5,50,0,0,0,0,0" width="30" isinstance="0" usefillcolor="1" fillcolor="none" activityname="" xmi.id="xAzR7i5q0yWE" postcondition="" documentation="" activitytype="0" height="30" precondition="" />
+         <activitywidget linecolor="none" usesdiagramfillcolor="1" linewidth="none" usesdiagramusefillcolor="1" x="42" showstereotype="1" y="92" font="Bitstream Vera Sans,9,-1,5,50,0,0,0,0,0" width="164" isinstance="0" usefillcolor="1" fillcolor="none" activityname="Clicou lista de arquivos" xmi.id="KdVNk28XxGrx" postcondition="" documentation="" activitytype="1" height="25" precondition="" />
+         <notewidget width="137" showstereotype="1" x="333" noteType="1" y="190" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="50" linecolor="none" xmi.id="K4tFEqgLXl9X" usefillcolor="1" linewidth="none" font="Bitstream Vera Sans,9,-1,5,50,0,0,0,0,0" text="" />
+        </widgets>
         <messages/>
         <associations/>
        </diagram>
@@ -108,7 +162,7 @@
      </UML:Namespace.ownedElement>
      <XMI.extension xmi.extender="umbrello" >
       <diagrams>
-       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpubliconly="1" showpackage="1" showstereotype="1" name="Saani - casos de uso" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="645" canvaswidth="924" localid="" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="zgzYzsQMc1es" documentation="" showscope="1" snapgrid="0" showatts="1" type="2" >
+       <diagram showopsig="1" linecolor="#ff0000" snapx="10" showattribassocs="1" snapy="10" linewidth="0" showattsig="1" showpubliconly="1" showpackage="1" showstereotype="1" name="Saani - casos de uso" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" canvasheight="770" canvaswidth="957" localid="" snapcsgrid="0" showgrid="0" showops="1" usefillcolor="1" fillcolor="#ffff00" zoom="100" xmi.id="zgzYzsQMc1es" documentation="" showscope="1" snapgrid="0" showatts="1" type="2" >
         <widgets>
          <actorwidget width="37" showstereotype="1" x="48" y="227" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="59" linecolor="none" xmi.id="Bcx2wl1clXab" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" />
          <usecasewidget width="120" showstereotype="1" x="225" y="56" usesdiagramusefillcolor="1" usesdiagramfillcolor="1" isinstance="0" fillcolor="none" height="49" linecolor="none" xmi.id="0OS0l9PsI1nI" usefillcolor="1" linewidth="none" font="DejaVu Sans,9,-1,0,50,0,0,0,0,0" />
@@ -188,11 +242,35 @@
   </UML:Model>
  </XMI.content>
  <XMI.extensions xmi.extender="umbrello" >
-  <docsettings viewid="zgzYzsQMc1es" uniqueid="ZRoN2E1AEw6I" documentation="" />
+  <docsettings viewid="x6tiNlCuf7Kd" uniqueid="ZqEjILjviMeP" documentation="" />
   <listview>
    <listitem open="1" type="800" label="Visões" >
     <listitem open="1" type="801" id="Logical View" >
      <listitem open="0" type="807" id="x6tiNlCuf7Kd" label="diagrama de classe" />
+     <listitem open="0" type="809" id="37Xmpx8MzYnu" label="atualizacao parametros espectro na UI" />
+     <listitem open="1" type="813" id="ISIAHGVgZCYt" >
+      <listitem open="0" type="814" id="x4LS1Tf8YdzY" />
+      <listitem open="0" type="814" id="QpKgFaqUpJBO" />
+      <listitem open="0" type="814" id="6pDGd8MpyefX" />
+      <listitem open="0" type="814" id="L5EDRpJlBxMU" />
+      <listitem open="0" type="814" id="ZqEjILjviMeP" />
+     </listitem>
+     <listitem open="1" type="813" id="CZE3hAetf3wu" />
+     <listitem open="1" type="813" id="IZ2iCynmtFaJ" />
+     <listitem open="1" type="813" id="GzFqCl47mab3" />
+     <listitem open="1" type="813" id="JWtLgfx1OIUZ" >
+      <listitem open="0" type="814" id="iTo2u0lZJHSd" />
+      <listitem open="0" type="814" id="TbKOU2pH2jHn" />
+      <listitem open="0" type="814" id="tnXrui1tfahF" />
+      <listitem open="0" type="814" id="dM4cCvPhmIPl" />
+      <listitem open="0" type="814" id="95MrIPGV1AAu" />
+      <listitem open="0" type="814" id="pKgNofDR1F3B" />
+      <listitem open="0" type="814" id="ARsuhGfoJzfb" />
+      <listitem open="0" type="814" id="Pv6Q3HJqZxCN" />
+     </listitem>
+     <listitem open="1" type="813" id="VjHDNT8SnYRG" />
+     <listitem open="1" type="813" id="W5gKPQozW6Fz" />
+     <listitem open="1" type="813" id="Ydb8n5DTNasB" />
      <listitem open="0" type="830" id="Datatypes" >
       <listitem open="1" type="829" id="bKo4E5mJ9adP" />
       <listitem open="1" type="829" id="NlNGYZXZW6Vz" />
@@ -212,7 +290,7 @@
       <listitem open="1" type="829" id="7BEQx0VzaL7B" />
      </listitem>
     </listitem>
-    <listitem open="1" type="802" id="Use Case View" >
+    <listitem open="0" type="802" id="Use Case View" >
      <listitem open="0" type="805" id="zgzYzsQMc1es" label="Saani - casos de uso" />
      <listitem open="1" type="811" id="Bcx2wl1clXab" />
      <listitem open="1" type="812" id="aVZL7YvN5HsV" />

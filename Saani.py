@@ -50,6 +50,7 @@ class startGui(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
 
+
         self.saiuAba=0
         self.configDir  = ''
         self.graph=None
@@ -78,8 +79,13 @@ class startGui(QtGui.QMainWindow):
         QtCore.QObject.connect(self.ui.cmdImpRes, QtCore.SIGNAL("clicked()"), self.imprimeResultados)
         QtCore.QObject.connect(self.ui.cmdImpConcentra, QtCore.SIGNAL("clicked()"), self.imprimeConcentracao)
         #QtCore.QObject.connect(self.ui.lstarqs, QtCore.SIGNAL("itemClicked(QListWidgetItem*)"), self.clicklst)
-        QtCore.QObject.connect(self.ui.lstarqs, QtCore.SIGNAL("itemClicked(QListWidgetItem*)"), self.ver_abas)
+        QtCore.QObject.connect(self.ui.lstarqs, QtCore.SIGNAL("itemClicked(QListWidgetItem*)"), self.clicklst)
         QtCore.QObject.connect(self.ui.rba,QtCore.SIGNAL("toggled(bool)"),self.ver_abas_padrao)
+        QtCore.QObject.connect(self.ui.calcularButton, QtCore.SIGNAL("clicked()"), self.calcAreas)
+        QtCore.QObject.connect(self.ui.tabWidget,QtCore.SIGNAL("currentChanged(int)"),self.verificaAbas)
+        QtCore.QObject.connect(self.cmdimpgraf, QtCore.SIGNAL("clicked()"), self.imprimeGrafico)
+        #QtCore.QObject.connect(self.cmdFindAreaPeak, QtCore.SIGNAL("clicked()"), self.achapico)
+
 #" cria atalhos para os menus e suas rotinas "
         qt.QIconSet = qt.QIcon
         self.printIcon    = qt.QIconSet(qt.QPixmap(IconDict["fileprint"]))
@@ -147,6 +153,7 @@ class startGui(QtGui.QMainWindow):
         self.statusBar().addPermanentWidget(self.pb)
         # lista de threads
         self.threads = []
+        self.dictThreadsCalc = dict()
 
 
         ## barra de statusBar
@@ -275,7 +282,7 @@ class startGui(QtGui.QMainWindow):
         """ Objeto: tabWidget - quadro de abas
          executa rotina para verificar a movimentação das abas da janela principal """
         currentTab = self.ui.tabWidget.currentIndex()
-        print "Aba atual: ", currentTab
+        #print "Aba atual: ", currentTab
         self.ver_abas()
 
     def imprimeGrafico(self):
@@ -387,20 +394,24 @@ class startGui(QtGui.QMainWindow):
         """ Objeto: lstarqs -  lista dos arquivos de espectros lancados no projeto
             ao clicar na lista de arquivos, seleciona o arquivo de espectro que deve ser trabalhado
             exibindo o grafico correspondente """
+        if self.ui.lstarqs.count() == 0:
+            return
         legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
         self.legend=legend
-        if self.ui.tabWidget.currentIndex() == 2:  # se estiver na aba de Resultados, mostra-os
-            self.montagrade(legend)
-        elif self.ui.tabWidget.currentIndex() == 0: # aba de grafico
-            info,x,y = self.lerlegend(legend)
-            self.graph.clearcurves()
-            curveinfo={}
-            self.graph.newCurve(legend,x,
-                                    y,
-                                    logfilter=1, curveinfo=None) #curveinfo)
-            self.graph.replot()
-            self.ui.tabWidget.setCurrentIndex(0)
-
+       #legend = self.graph.getactivecurve(justlegend = 1)
+        if legend is None:
+            return
+        info,x,y = self.lerlegend(legend)
+        self.ui.lblvivo.setText(str(info['TempoVivo']))
+        self.ui.lblmorto.setText(str(info['TempoTotal']))
+        aux22=(info['DataTempo'])
+        aux=QtCore.QString(aux22)
+        now2 = QtCore.QDateTime.fromString(aux22, QtCore.QString("dd/MM/yyyy hh:mm:ss"))
+        self.ui.txtdatah.setDateTime(now2)
+        self.ui.txtmassa.setText(str(info['Massa']))
+        self.ui.txtnivel.setText(str(info['Nivel']))
+        self.ui.txtsigma.setText(str(info['Sigma']))
+        self.verificaAbas()
 
 
     def recupera(self,pEnergia=0.0,pIntervalo=0.0,plegend='0'):
@@ -787,6 +798,15 @@ class startGui(QtGui.QMainWindow):
         else:
             self.ui.groupBox.setVisible(1)
 
+    def parametros_espectro(self,legend=None):
+        """rotina chamada para atualizar os dados relativos ao espectro atual
+               (aba tbParEspec)
+           recebe como parâmetro o nome do arquivo atual (legend) - aquele
+               selecionado na lista de arquivos
+        """
+        if legend == None:
+            return
+
     def ver_abas(self):
         """ da rotina: verifcaAbas do Objeto: tabWidget - quadro de abas
             verificar a movimentação das abas da janela principal e excuta procedimentos
@@ -803,98 +823,45 @@ class startGui(QtGui.QMainWindow):
              1: indica que saiu da aba Parametros entao identifica se eh amostra ou padrao
                aguarda os dados (parametros) na variavel de global para o arquivo (espectro)
         """
-        if self.saiuAba == 4:
-           self.dataObjectsDict[legend].info['FakeCal']=True
-           #self.pprojeto['slope'] = 1.0
-           #self.pprojeto['offset']= 0.0
-           #self.pprojeto['ro']    = 1.0
-           #self.pprojeto['kres']  = 1.0
-           #self.pprojeto['ArqCalib']  = ""
-           self.saiuAba = 0
-           self.ui.tabWidget.setCurrentIndex(0)
-#              return
-           #self.pprojeto['titulo1']  = str(self.ui.txtdproj1.text())
-           #self.pprojeto['titulo2']  = str(self.ui.txtdproj2.toPlainText())
-           self.saiuAba = 0
-#           if self.projeto == '':
-#              self.salvarComo()
 
-        if self.saiuAba == 1:
-         try:
-           legend = self.graph.getactivecurve(justlegend = 1)
-           if self.ui.rba.isChecked():
-              self.dataObjectsDict[self.vlegend].info['Amostra']=1
-              self.dataObjectsDict[self.vlegend].info['lElem']=''
-           else:
-              if self.ui.rbp.isChecked():
-                 self.dataObjectsDict[self.vlegend].info['Amostra']=2
-                 n=self.ui.tbElem.rowCount()
-                 lElem={}
-                 for j in range(0,n):
-                    linha={}
-                    linha['elemento']=str(self.ui.tbElem.item(j, 0).text())
-                    linha['energia']=str(self.ui.tbElem.item(j, 1).text())
-                    linha['meiavida']=str(self.ui.tbElem.item(j, 2).text())
-                    linha['concentra']=str(self.ui.tbElem.item(j, 3).text())
-                    linha['concentradesv']=str(self.ui.tbElem.item(j, 4).text())
-                    lElem[j]=linha
-                 self.dataObjectsDict[self.vlegend].info['lElem']=lElem
-              else:
-                 print "Erro selecione tipo amostra ou padrão"
-           self.dataObjectsDict[self.vlegend].info['TempoVivo']=float(self.ui.lblvivo.text())
-           self.dataObjectsDict[self.vlegend].info['TempoTotal']=float(self.ui.lblmorto.text())
-           self.dataObjectsDict[self.vlegend].info['DataTempo']=("%s" %(self.ui.txtdatah.text()))
-           if self.dataObjectsDict[self.vlegend].info['Massa'] <> str(self.ui.txtmassa.text()):
-              self.dataObjectsDict[self.vlegend].info['Massa']=str(self.ui.txtmassa.text())
-              self.dirty = True
-           calcula=True
-           if self.dataObjectsDict[self.vlegend].info['Nivel']==str(self.ui.txtnivel.text()):
-              if self.dataObjectsDict[self.vlegend].info['Sigma']==str(self.ui.txtsigma.text()):
-                 calcula=False
-           self.dataObjectsDict[self.vlegend].info['Nivel']=str(self.ui.txtnivel.text())
-           self.dataObjectsDict[self.vlegend].info['Sigma']=str(self.ui.txtsigma.text())
-           self.saiuAba = 0
-           if calcula:
-# ao ler um arquivo de espectro individual, tb faz o calculo em background
-              fc = fazCalculos(self.ui.lstarqs,self.ui.lstarqs.currentRow())
-              self.threads.append(fc)
-              fc.start()
-#              self.dirty = True
-#              self.setWindowModified(self.dirty)
-         except:
-            msg = qt.QMessageBox(self)
-            msg.setIcon(qt.QMessageBox.Critical)
-            msg.setText("Calculo ainda em processo: %s" % (sys.exc_info()[1]))
-            msg.exec_()
-            self.saiuAba = 0
-            self.ui.tabWidget.setCurrentIndex(0)
+        try:
+            legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
+            self.legend=legend
+        except AttributeError:
             return
+       #legend = self.graph.getactivecurve(justlegend = 1)
+        if legend is None:
+            return
+        info,x,y = self.lerlegend(legend)
+        self.ui.lblvivo.setText(str(info['TempoVivo']))
+        self.ui.lblmorto.setText(str(info['TempoTotal']))
+        aux22=(info['DataTempo'])
+        aux=QtCore.QString(aux22)
+        now2 = QtCore.QDateTime.fromString(aux22, QtCore.QString("dd/MM/yyyy hh:mm:ss"))
+        self.ui.txtdatah.setDateTime(now2)
+        self.ui.txtmassa.setText(str(info['Massa']))
+        self.ui.txtnivel.setText(str(info['Nivel']))
+        self.ui.txtsigma.setText(str(info['Sigma']))
 
 # aba - Grafico
         if self.ui.tabWidget.currentIndex() == 0:
-            print "num. espectros lista: ", self.ui.lstarqs.count()
             if self.ui.lstarqs.count() > 0:
                 legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
-#            print legend
                 info,x,y = self.lerlegend(legend)
-#                print "x type", type(x), "  y type",  type(y)
                 self.graph.clearcurves()
                 curveinfo={}
                 self.graph.newCurve(legend,x,
                                     y,
                                     logfilter=1, curveinfo=None) #curveinfo)
                 self.graph.replot()
-#                self.ui.tabWidget.setCurrentIndex(0)
             else:
             # não tem espectro aberto, apaga os gráficos
                 self.graph.clearcurves()
 # aba - Parametros
         elif self.ui.tabWidget.currentIndex() == 1:
-           self.saiuAba = 1
            if self.ui.lstarqs.count() == 0:
                return
            legend="%s" %(self.ui.lstarqs.item(self.ui.lstarqs.currentRow()).text())
-           #legend = self.graph.getactivecurve(justlegend = 1)
            if legend is None:
                msg = qt.QMessageBox(self)
                msg.setIcon(qt.QMessageBox.Critical)
@@ -982,9 +949,7 @@ class startGui(QtGui.QMainWindow):
                   msg.exec_()
                return
            self.calConcentra()
-# ------ aba -Projeto
-        elif self.ui.tabWidget.currentIndex() == 4:
-           self.saiuAba=self.ui.tabWidget.currentIndex()
+
 
     def imprimeResultados(self):
         """ Botao: cmdImpRes - da aba Resultado dos Calculos
@@ -1160,19 +1125,11 @@ class startGui(QtGui.QMainWindow):
         if legend == None:
             return
 
-#        legend = self.graph.getactivecurve(justlegend = 1)
-#        vvl=legend
-#        if legend is None:
-#            msg = qt.QMessageBox(self)
-#            msg.setIcon(qt.QMessageBox.Critical)
-#            msg.setText("Please Select an active curve")
-#            if qt.qVersion() < '4.0.0':
-#                msg.exec_loop()
-#            else:
-#                msg.exec_()
-#            return
         info,x,y = self.lerlegend(legend)
         if info is not None:
+
+            verde = QtGui.QColor("lightgreen")
+            vermelho = QtGui.QColor(255,191,191)
             xmin,xmax=self.graph.getx1axislimits()
             self.vispectfit.Lt = info['TempoVivo']
             self.vispectfit.vy=np.array(y,np.float64)
@@ -1182,6 +1139,7 @@ class startGui(QtGui.QMainWindow):
             self.dataObjectsDict[legend].info['ResCalculo']=ppdic
             n=len(ppdic)
             self.nlinhas=n
+            self.updateStatus("%s" % ("Espectro "  + legend + " Calculado!"))
             return
         else:
             msg = qt.QMessageBox(self)
@@ -1228,10 +1186,10 @@ class startGui(QtGui.QMainWindow):
         self.cmdimpgraf.setText(QtGui.QApplication.translate("frmmenu", "Imprimir", None, QtGui.QApplication.UnicodeUTF8))
 
 #        self.ui.tabWidget.addTab(self.graph,"Grï¿½fico")
+        self.ui.tabWidget.removeTab(0)        
         self.ui.tabWidget.insertTab(0,self.graph,u"Gráfico")
         self.ui.tabWidget.setCurrentIndex(0)
-        QtCore.QObject.connect(self.ui.tabWidget,QtCore.SIGNAL("currentChanged(int)"),self.verificaAbas)
-        QtCore.QObject.connect(self.cmdimpgraf, QtCore.SIGNAL("clicked()"), self.imprimeGrafico)
+
 # posiciona aba
 #        self.ui.tabWidget.setCurrentIndex(4)
 
@@ -1330,12 +1288,61 @@ class startGui(QtGui.QMainWindow):
         self.ui.tabWidget.setCurrentIndex(0)
 
         # ao ler um arquivo de espectro individual, tb faz o calculo em background
-        fc = fazCalculos(self.ui.lstarqs,posicao)
-#        fc = fazCalculos(self.ui.lstarqs)
-        self.threads.append(fc)
-        fc.start()
-#        self.dirty = True
-#        self.setWindowModified(self.dirty)
+        # fc = fazCalculos(self.ui.lstarqs,posicao)
+        # fc = fazCalculos(self.ui.lstarqs)
+        # self.threads.append(fc)
+        # fc.start()
+        # self.dirty = True
+        # self.setWindowModified(self.dirty)
+
+    def calcAreas(self):
+
+        posicao = self.ui.lstarqs.currentRow()
+        if posicao == -1:
+            msg = qt.QMessageBox(self)
+            msg.setIcon(qt.QMessageBox.Critical)
+            msg.setText(u"Nenhum arquivo selecionado")
+            msg.exec_()
+            return
+        arq ="%s" %(self.ui.lstarqs.item(posicao).text())
+#        print "posicao: ", posicao
+        verde = QtGui.QColor("lightgreen")
+        vermelho = QtGui.QColor(255,191,191)
+        self.ui.lstarqs.item(posicao).setBackgroundColor(vermelho)
+        self.vispectFit(arq)
+        self.ui.lstarqs.item(posicao).setBackgroundColor(verde)
+        return
+#        if arq not in self.dictThreadsCalc.keys():
+#            fc = fazCalculos(self.ui.lstarqs,arq,posicao)
+#            self.dictThreadsCalc[arq] = fc
+#            fc.start()
+#            try:
+#                self.dictThreadsCalc.pop(arq)
+#            except KeyError:
+#                msg = qt.QMessageBox(self)
+#                msg.setIcon(qt.QMessageBox.Critical)
+#                msg.setText(u"Erro não esperado \n\n %s não localizado no dicionário!" %(arq))
+#                msg.exec_()
+#        elif self.ui.lstarqs.item(posicao).backgroundColor() == vermelho:
+#            msg = qt.QMessageBox(self)
+#            msg.setIcon(qt.QMessageBox.Critical)
+#            msg.setText(u"%s já está sendo calculado \n\n Espere!" %(arq))
+#            msg.exec_()
+#        elif self.ui.lstarqs.item(posicao).backgroundColor() == verde:
+#            msg = qt.QMessageBox(self)
+#            msg.setIcon(qt.QMessageBox.Critical)
+#            msg.setText(u"%s já calculado \n\n Calculando novamente" %(arq))
+#            msg.exec_()
+#            fc = fazCalculos(self.ui.lstarqs,arq,posicao)
+#            self.dictThreadsCalc[arq] = fc
+#            fc.start()
+#            try:
+#                self.dictThreadsCalc.pop(arq)
+#            except KeyError:
+#                msg = qt.QMessageBox(self)
+#                msg.setIcon(qt.QMessageBox.Critical)
+#                msg.setText(u"Erro não esperado \n %s não localizado no dicionário!" %(arq))
+#                msg.exec_()
 
     def montagrade(self,legend):
         """rotina para montar a tabela com o resultado dos calculos (busca de picos e energias)
@@ -1349,9 +1356,10 @@ class startGui(QtGui.QMainWindow):
         try:
             n=len(ppdic)
         except:
-            crtFuncoes.criarGrade(self.ui.tableWidget, 1, 12, {})
-            crtFuncoes.cabecGradeRes(self.ui.tableWidget)
-            crtFuncoes.incGrade(self.ui.tabWidget, 0, "Sem Resultados")
+            self.updateStatus("Sem Resultados para mostrar")
+#            crtFuncoes.criarGrade(self.ui.tableWidget, 1, 12, {})
+#            crtFuncoes.cabecGradeRes(self.ui.tableWidget)
+#            crtFuncoes.incGrade(self.ui.tabWidget, 0, "Sem Resultados")
             return
         if n > 0:
             self.nlinhas=n
@@ -1380,28 +1388,35 @@ class fazCalculos(threading.Thread):
 
 #       def __init__(self,listaarqs, parent=None):
 #           super(fazCalculos,self).__init__(parent)
-       def __init__(self, listaarqs,posicao=0):
+       def __init__(self, listarqs, arq,posicao=0):
            threading.Thread.__init__(self)
 
-           self.listaarqs = listaarqs
+           self.listaarqs = listarqs
+           self.arq = arq
            self.posicao   = posicao
+           self.verde = QtGui.QColor("lightgreen")
+           self.vermelho = QtGui.QColor(255,191,191)
 
 #           fazCalculos.sem.acquire(1)
 
 
        def run(self):
            """faz os calculos dos espectros chamando a vispectfit"""
-           if self.posicao == 0:
-            for i in range(self.listaarqs.count()):
-               arq = "%s" % (self.listaarqs.item(i).text())
-               appStart.vispectFit(arq)
-               verde = QtGui.QColor("lightgreen")
-               self.listaarqs.item(i).setBackgroundColor(verde)
-           else:
-               arq = "%s" % (self.listaarqs.item(self.posicao).text())
-               appStart.vispectFit(arq)
-               verde = QtGui.QColor("lightgreen")
-               self.listaarqs.item(self.posicao).setBackgroundColor(verde)
+           self.listaarqs.item(self.posicao).setBackgroundColor(self.vermelho)
+           appStart.vispectFit(self.arq)
+           self.listaarqs.item(self.posicao).setBackgroundColor(self.verde)
+
+#           if self.posicao == 0:
+#            for i in range(self.listaarqs.count()):
+#               arq = "%s" % (self.listaarqs.item(i).text())
+#               appStart.vispectFit(arq)
+#               verde = QtGui.QColor("lightgreen")
+#               self.listaarqs.item(i).setBackgroundColor(verde)
+#           else:
+#               arq = "%s" % (self.listaarqs.item(self.posicao).text())
+#               appStart.vispectFit(arq)
+#               verde = QtGui.QColor("lightgreen")
+#               self.listaarqs.item(self.posicao).setBackgroundColor(verde)
 
 #               self.listaarqs.setCurrentRow(i)
 #           fazCalculos.sem.release(1)
