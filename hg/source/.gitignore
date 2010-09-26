@@ -1,0 +1,6 @@
+*~
+*/*~
+*.pyc
+.directory
+*/.directory
+*/*.pyc
