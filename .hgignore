@@ -16,4 +16,3 @@ syntax: glob
 # A hidden directory created by Dolphin.
 .directory
 local/*
-.hgignore
