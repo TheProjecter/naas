@@ -3,6 +3,7 @@ syntax: glob
 # Empty lines are skipped too.
 
 # Backup files left behind by the Emacs editor.
+*.pyc
 *~
 
 # Lock files used by the Emacs editor.
